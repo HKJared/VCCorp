@@ -1,0 +1,150 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.price {
+  background-color: #073763;
+  text-align: center;
+  color: #fff;
+  width: 265px;
+  padding: 5px;
+  font-weight:700;
+  margin-left: 1080px;
+}
+
+.table-container {
+    border-collapse: collapse;
+  }
+
+  .tr {
+    display: flex;
+  }
+  
+  .td, .th {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin: 0;
+  }
+
+  .th {
+    border: 0.5px solid #073763;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    font-size: 14px;
+    font-weight:700;
+    background-color: #073763;
+    color: #fff;
+  }
+
+  .td {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 0.5px solid #bbbbbb;
+    height: 25px;
+    font-size: 13px;
+    font-weight: lighter;
+  }
+
+  .td2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 0.5px solid #bbbbbb;
+    height: 120px;
+    font-size: 13px;
+    font-weight: lighter;
+  }
+
+  .tbody {
+    height: 650px;
+    overflow-y: auto;
+  }
+  .tbody::-webkit-scrollbar {
+    display: none;
+  }
+
+  .red , .orange {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .red {
+    background-color: red;
+  }
+
+  .orange {
+    background-color: #ff9900;
+  }
+
+  .noTop {
+    border-top: 0.5px solid #fff;
+  }
+
+  .noBot {
+    border-bottom: 0.5px solid #fff;
+  }
+
+  .no {
+    width: 30px;
+  }
+
+  .web {
+    width: 80px;
+    color: #2f74b4;
+    font-weight: 700;
+    font-style: italic;
+    text-decoration: underline;
+  }
+
+  .adsPosition {
+    width: 160px;
+  }
+
+  .dimensions {
+    width: 455px; 
+  }
+
+  .platform {
+    width: 80px;
+  }
+
+  .demo {
+    width: 120px;
+    color: #2f74b4;
+    font-weight: 700;
+    font-style: italic;
+    text-decoration: underline;
+  }
+
+  .buyingMethod {
+    width: 150px;
+  }
+
+  .price {
+    width: 60px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .performance {
+    width: 60px;
+  }
+
+  .note {
+    width: 40px;
+  }
