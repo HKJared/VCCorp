@@ -6,21 +6,58 @@ body {
   align-items: center;
 }
 
-.price {
+.search {
+  margin-top: 15px;
+  display: flex;
+  height: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 0px 3px #073763;
+}
+
+.search input {
+  height: 30px;
+  width: 330px;
+  border: 0;
+  border-radius: 15px 0px 0px 15px;
+  font-size: 20px;
+  padding-left: 20px;
+  padding-block: 0;
+}
+
+.search input:focus {
+  outline: none;
+}
+
+.search input, .search button {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.search button {
+  height: 30px;
+  width: 30px;
+  border: 0;
+  border-radius: 0px 15px 15px 0px;
   background-color: #073763;
-  text-align: center;
+}
+
+.search button i {
   color: #fff;
-  width: 265px;
-  padding: 5px;
-  font-weight:700;
-  margin-left: 1080px;
 }
 
 .table-container {
     border-collapse: collapse;
+    border: 2px solid #aaaaaa;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-top: 10px;
   }
 
   .tr {
+    display: flex;
+  }
+
+  .header-web {
     display: flex;
   }
   
@@ -53,6 +90,10 @@ body {
     font-weight: lighter;
   }
 
+  .tr:hover {
+    background-color: #f7f7f7;
+  }
+
   .td2 {
     display: flex;
     align-items: center;
@@ -65,7 +106,7 @@ body {
   }
 
   .tbody {
-    height: 650px;
+    height: 550px;
     overflow-y: auto;
   }
   .tbody::-webkit-scrollbar {
@@ -109,6 +150,7 @@ body {
     font-weight: 700;
     font-style: italic;
     text-decoration: underline;
+
   }
 
   .adsPosition {
@@ -129,22 +171,43 @@ body {
     font-weight: 700;
     font-style: italic;
     text-decoration: underline;
+    cursor: pointer;
   }
 
   .buyingMethod {
     width: 150px;
   }
 
-  .price {
-    width: 60px;
+  .detail {
+    width: 100px;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
   }
 
   .performance {
-    width: 60px;
+    width: 100px;
   }
 
   .note {
     width: 40px;
+  }
+
+  .add {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    background-color: #073763;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .add:hover {
+    background-color: #0c4375;
+  }
+
+  .add i {
+     color: #fff;
+     font-size: 20px;
   }
