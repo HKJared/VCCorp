@@ -11,7 +11,6 @@ const getHomepage = async (req, res) => {
         ORDER BY 
             no, platform, linkDemo, adsPosition`);
         
-        // Xử lý dữ liệu rows ở đây
         return res.status(200).render('index', { sheets: rows   });
         
     } catch (error) {

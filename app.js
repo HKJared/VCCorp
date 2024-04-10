@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
+const bodyParser = require('body-parser');
 const configViewEngine = require('./config/viewEngine');
 
 const webRouter = require('./routes/webRouter');
@@ -9,9 +9,11 @@ const app = express();
 
 const port = 3030;
 
-app.use(webRouter);
-app.use(apiRouter);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use('/', webRouter);
+app.use('/api', apiRouter);
 
 configViewEngine(app);
 

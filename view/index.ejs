@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -30,6 +31,7 @@
                     <div>Hiệu suất</div>
                 </div>
                 <div class="th note">Note</div>
+                <div class="th action"></div>
             </div>
         </div>
         <div class="tbody">
@@ -49,17 +51,17 @@
                         <% } else { %>
                             <% trans = -1 * noSame / 2.0 * 42.6 %>
                             <div class="td no noTop"><div style="transform: translateY(<%- trans %>px);"><%= sheets[i].no %></div></div>
-                            <div class="td web noTop" onclick="windowOpen(`https:` + `<%= sheets[i].website %>`)" name="website_<%= sheets[i].website %>"><div style="transform: translateY(<%- trans %>px); overflow-x: hidden;"><%= sheets[i].website %></div></div>
+                            <div class="td web noTop" data-link="https:<%= sheets[i].website %>" name="website_<%= sheets[i].website %>"><div style="transform: translateY(<%- trans %>px); overflow-x: hidden;"><%= sheets[i].website %></div></div>
                             <% noSame = 0; %>
                         <% } %>
                     <% } else { %>
                         <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no) { %>
                             <% noSame++; %>
                             <div class="td no noBot"></div>
-                            <div class="td web noBot" name="website_<%= sheets[i].website %>"></div>
+                            <div class="td web noBot" name="website_<%= sheets[i].website %>" data-link="https:<%= sheets[i].website %>"></div>
                         <% } else { %>
                             <div class="td no"><%= sheets[i].no %></div>
-                            <div class="td web" style="overflow-x: hidden;"  onclick="windowOpen(`https:` + `<%= sheets[i].website %>`)" name="website_<%= sheets[i].website %>"><%= sheets[i].website %></div>
+                            <div class="td web" style="overflow-x: hidden;" data-link="https:<%= sheets[i].website %>" name="website_<%= sheets[i].website %>"><%= sheets[i].website %></div>
                             <% noSame = 0; %>
                         <% } %>
                     <% } %>
@@ -112,75 +114,137 @@
                     <% if (demoSame) { %>
                         <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].linkDemo == sheets[i+1].linkDemo) { %>
                             <% demoSame++; %>
-                            <div class="td demo noTop noBot"></div>
+                            <div class="td demo noTop noBot" data-link="<%= sheets[i].linkDemo %>"></div>
                         <% } else { %>
                             <% trans = -1 * demoSame / 2.0 * 42.6 %>
-                            <div class="td demo noTop"><div style="transform: translateY(<%- trans %>px); cursor: pointer;" onclick="windowOpen(`<%= sheets[i].linkDemo %>`)"><%= sheets[i].demo %></div></div>
+                            <div class="td demo noTop" data-link="<%= sheets[i].linkDemo %>"><div style="transform: translateY(<%- trans %>px); cursor: pointer;"><%= sheets[i].demo %></div></div>
                             <% demoSame = 0; %>
                         <% } %>
                     <% } else { %>
                         <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].linkDemo == sheets[i+1].linkDemo) { %>
                             <% demoSame++; %>
-                            <div class="td demo noBot"></div>
+                            <div class="td demo noBot" data-link="<%= sheets[i].linkDemo %>"></div>
                         <% } else { %>
-                            <div class="td demo" onclick="windowOpen(`<%= sheets[i].linkDemo %>`)"><%= sheets[i].demo %></div>
+                            <div class="td demo" data-link="<%= sheets[i].linkDemo %>"><%= sheets[i].demo %></div>
                             <% demoSame = 0; %>
                         <% } %>
                     <% } %>
 
                     <div class="td buyingMethod"><%= sheets[i].buyingMethod %></div>
-                    <div class="td detail">Detail</div>
+                    <div class="td detail" data-sheet="<%= JSON.stringify(sheets[i]) %>">Detail</div>
                     <div class="td note"><%= sheets[i].note %></div>
-
+                    <div class="td action">
+                        <button type="button" class="updateBtn" data-sheet="<%= JSON.stringify(sheets[i]) %>"><i class="fa-solid fa-pen"></i></button>
+                        <button type="button" class="deleteBtn" data-idrow="<%= sheets[i].idRow %>"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>
             <% } %>
         </div>
         <div class="add"><i class="fa-solid fa-plus"></i></div>
     </div>
+    <div class="getDetail">
+    </div>
 
 </body>
 <script>
-    function windowOpen(link) {
-        if (link) {
-            window.open(link, '_blank')
-        } else {
-            alert('There are no demos yet!')
-        }
-    }
-
-    const searchForm = document.getElementById('search_form');
-    
-    searchForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        search();
-    });
-
-    function search() {
-        var searchValue = document.getElementById('search_form').querySelector('input[type="text"]').value.toLowerCase();
-        var tableRows = document.querySelectorAll('.tbody .tr');
-        var listHeaderWeb = document.querySelectorAll('.tbody .header-web');
-
-        listHeaderWeb.forEach(function(row) {
-            var headerText = row.textContent.toLowerCase();
-
-            if (!headerText.includes(searchValue)) {
-                row.style.display = 'none';
+    $(document).ready(function(){
+        $('.td.demo, .td.web').click(function() {
+            var link = $(this).data('link');
+            if (link) {
+                window.open(link, '_blank');
             } else {
-                row.style.display = 'flex'; 
-            }
-        })
-    
-        tableRows.forEach(function(row) {
-            var website = row.querySelector('.web').getAttribute('name').toLowerCase();
-    
-            if (website.includes(searchValue)) {
-                row.style.display = 'flex'; 
-            } else {
-                row.style.display = 'none';
+                alert('Link is not available!');
             }
         });
-    }
-    
+
+        $('#search_form').submit(function(event){
+            event.preventDefault();
+            search();
+        });
+
+        function search() {
+            var searchValue = $('#search_form input[type="text"]').val().toLowerCase();
+            $('.tbody .tr').hide();
+            $('.tbody .header-web').hide();
+            $('.tbody .tr .web[name*="' + searchValue + '"]').closest('.tr').show();
+            $('.tbody .header-web:contains("' + searchValue + '")').show();
+        }
+
+        $('.td.detail').click(function(){
+            var sheet = $(this).data('sheet');
+            getDetail(sheet);
+        });
+
+        function getDetail(sheet) {
+
+            var detailHTML = `
+            <div class="detail-content">
+                <div><center><strong>Detail</strong><center></div>
+                <div class="">Website: ${ sheet.website }</div>
+                <div class="ads-position">Tên vị trí: ${sheet.adsPosition }</div>
+                <div class="plat-form">Nền tảng: ${sheet.platform }</div>
+                <div class="buying-method">Cách tính giá: ${sheet.buyingMethod.replace(/[\u0000-\u001F]+/g, " - ") }</div>
+                <hr>
+                <div class="infor" style="display: flex;">
+                    <div class="price">
+                        <h5>Đơn giá:</h5>
+                        <div>Trang chủ: ${ sheet.homepage ? sheet.homepage.toLocaleString() : "" }</div>
+                        <div>Xuyên trang: ${ sheet.crossSite ? sheet.crossSite.toLocaleString() : "" }</div>
+                        <div>Xuyên trang chi tiết: ${ sheet.detailCrossSite ? sheet.detailCrossSite.toLocaleString() : "" }</div>
+                        <div>Chuyên mục: ${ sheet.categories ? sheet.categories.toLocaleString() : "" }</div>
+                    </div>
+                    <div class="performance" style="margin-left: 100px;">
+                        <h5>Hiệu suất:</h5>
+                        <div>CTR Trung bình: ${ sheet.averageCTR ? sheet.averageCTR : "-" }</div>
+                        <div>Est Traffic: ${ sheet.estTraffic ? sheet.estTraffic : "-" }</div>
+                        <div>Est Impression: ${ sheet.estImpression ? sheet.estImpression : "-" }</div>
+                        <div>Est CTR: ${ sheet.estCTR ? sheet.estCTR : "-" }</div>
+                    </div>
+                </div>
+            </div>
+            <div class="Xbutton">
+                <button id="Xbutton" type="button"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `;
+            $('.getDetail').html(detailHTML).show();
+
+            $('#Xbutton').click(function() {
+                $('.getDetail').empty().hide();
+            });
+        }
+
+        $('.deleteBtn').click(async function() {
+            if (confirm('Confirm to delete this line')) {
+                const idRow = $(this).data('idrow');
+                const data = {
+                    idRow: idRow
+                }
+                
+                fetch('http://localhost:3030/api/delete-row', {
+                    method: 'DELETE',
+                    headers: {
+                        "Content-Type" : "application/json",
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                    }
+                    return response.json(); 
+                  })
+                  .then(data => {
+                    alert(data.message);
+
+                    if (data.message == 'Deleted.') {
+                        $(this).closest('.tr').remove();
+                    }
+                  })
+                  .catch(error => {
+                    console.error('There was a problem with your fetch operation:', error);
+                  });
+            }
+        });
+    });
 </script>
 </html>
