@@ -19,6 +19,15 @@ const getHomepage = async (req, res) => {
     }
 }
 
+const getAdminPage = async (req, res) => {
+    try {
+        return res.status(200).render('admin');
+    } catch (error) {
+        console.error(error);
+        return res.status(404).json('Server error');
+    }
+}
+
 module.exports = {
-    getHomepage
+    getHomepage, getAdminPage
 }

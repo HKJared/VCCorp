@@ -47,7 +47,7 @@ const createRow = async (req, res) => {
 
 const getRow = async (req, res) => {
     try {
-        const idRow = req.body.idRow;
+        const idRow = req.query.idRow;
 
         if (!idRow) {
             return res.status(400).json({ message: 'Data about the row (idRow) was not sent from the client side.'});
@@ -71,16 +71,17 @@ const getRow = async (req, res) => {
 
 const getRows = async (req, res) => {
     try {
-        const key = req.body.key;
+        const key = req.query.key;
 
         if (!key) {
             return res.status(400).json({ message: 'Data about the row (website) was not sent from the client side.'});
         }
 
-        const [rows, fields] = pool.execute(`
+        const [rows, fields] = await pool.execute(`
                                             SELECT idRow, no, website, adsPosition, dimensions, platform, demo, linkDemo, buyingMethod
                                             FROM sheets
-                                            WHERE website LIKE '%${key}%'`);
+                                            WHERE website LIKE '%${key}%'
+                                            ORDER BY no, platform, linkDemo, adsPosition`);
 
         return res.status(200).json({   data: rows  });
     } catch (error) {
