@@ -6,6 +6,7 @@
     <title>View data</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
@@ -15,129 +16,8 @@
             <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
         </form>
     </div>
-    <div class="table-container">
-        <div class="thead">
-            <div class="tr">
-                <div class="th no">STT</div>
-                <div class="th web" style="color: #fff; text-decoration: none; font-style: normal;">Website</div>
-                <div class="th adsPosition">Tên vị trí</div>
-                <div class="th dimensions">Kích thước (px)</div>
-                <div class="th platform">Nền tảng</div>
-                <div class="th demo" style="color: #fff; text-decoration: none; font-style: normal;">Demo</div>
-                <div class="th buyingMethod">Cách tính giá</div>
-                <div class="th detail">
-                    <div>Đơn giá</div>
-                    <div>&</div>
-                    <div>Hiệu suất</div>
-                </div>
-                <div class="th note">Note</div>
-            </div>
-        </div>
-        <div class="tbody">
-            <% let cur = 1, noSame = 0, adsSame = 0, platformSame = 0, demoSame = 0, trans; %>
-            <% for (let i = 0; i < sheets.length; i++) { %>
-                <% if (sheets[i].no == cur) { %>
-                    <div class="header-web <%= cur % 2 != 0 ? 'red' : 'orange' %>"><%- sheets[i].website.toUpperCase() %></div>
-                    <% cur++; %>
-                <% } %>
-                <div class="tr">
-                    <!-- set no, website -->
-                    <% if (noSame) { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no) { %>
-                            <% noSame++; %>
-                            <div class="td no noTop noBot"></div>
-                            <div class="td web noTop noBot" name="website_<%= sheets[i].website %>"></div>
-                        <% } else { %>
-                            <% trans = -1 * noSame / 2.0 * 42.6 %>
-                            <div class="td no noTop"><div style="transform: translateY(<%- trans %>px);"><%= sheets[i].no %></div></div>
-                            <div class="td web noTop" data-link="https:<%= sheets[i].website %>" name="website_<%= sheets[i].website %>"><div style="transform: translateY(<%- trans %>px); overflow-x: hidden;"><%= sheets[i].website %></div></div>
-                            <% noSame = 0; %>
-                        <% } %>
-                    <% } else { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no) { %>
-                            <% noSame++; %>
-                            <div class="td no noBot"></div>
-                            <div class="td web noBot" name="website_<%= sheets[i].website %>" data-link="https:<%= sheets[i].website %>"></div>
-                        <% } else { %>
-                            <div class="td no"><%= sheets[i].no %></div>
-                            <div class="td web" style="overflow-x: hidden;" data-link="https:<%= sheets[i].website %>" name="website_<%= sheets[i].website %>"><%= sheets[i].website %></div>
-                            <% noSame = 0; %>
-                        <% } %>
-                    <% } %>
-
-                    <!-- set adsPosition, dimensions -->
-                    <% if (adsSame) { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].adsPosition == sheets[i+1].adsPosition) { %>
-                            <% adsSame++; %>
-                            <div class="td adsPosition noTop noBot"></div>
-                            <div class="td dimensions noTop noBot"></div>
-                        <% } else { %>
-                            <% trans = -1 * adsSame / 2.0 * 42.6 %>
-                            <div class="td adsPosition noTop"><div style="transform: translateY(<%- trans %>px);"><%= sheets[i].adsPosition %></div></div>
-                            <div class="td dimensions noTop"><div style="transform: translateY(<%- trans %>px);"><%= sheets[i].dimensions %></div></div>
-                            <% adsSame = 0; %>
-                        <% } %>
-                    <% } else { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].adsPosition == sheets[i+1].adsPosition) { %>
-                            <% adsSame++; %>
-                            <div class="td adsPosition noBot"></div>
-                            <div class="td dimensions noBot"></div>
-                        <% } else { %>
-                            <div class="td adsPosition"><%= sheets[i].adsPosition %></div>
-                            <div class="td dimensions"><%= sheets[i].dimensions %></div>
-                            <% adsSame = 0; %>
-                        <% } %>
-                    <% } %>
-
-                    <!-- set platform -->
-                    <% if (platformSame) { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].platform == sheets[i+1].platform) { %>
-                            <% platformSame++; %>
-                            <div class="td platform noTop noBot"></div>
-                        <% } else { %>
-                            <% trans = -1 * platformSame / 2.0 * 42.6 %>
-                            <div class="td platform noTop"><div style="transform: translateY(<%- trans %>px);"><%= sheets[i].platform %></div></div>
-                            <% platformSame = 0; %>
-                        <% } %>
-                    <% } else { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].platform == sheets[i+1].platform) { %>
-                            <% platformSame++; %>
-                            <div class="td platform noBot"></div>
-                        <% } else { %>
-                            <div class="td platform"><%= sheets[i].platform %></div>
-                            <% platformSame = 0; %>
-                        <% } %>
-                    <% } %>
-
-                    <!-- set demo -->
-                    <% if (demoSame) { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].linkDemo == sheets[i+1].linkDemo) { %>
-                            <% demoSame++; %>
-                            <div class="td demo noTop noBot" data-link="<%= sheets[i].linkDemo %>"></div>
-                        <% } else { %>
-                            <% trans = -1 * demoSame / 2.0 * 42.6 %>
-                            <div class="td demo noTop" data-link="<%= sheets[i].linkDemo %>"><div style="transform: translateY(<%- trans %>px); cursor: pointer;"><%= sheets[i].demo %></div></div>
-                            <% demoSame = 0; %>
-                        <% } %>
-                    <% } else { %>
-                        <% if (sheets[i+1] && sheets[i].no == sheets[i+1].no && sheets[i].linkDemo == sheets[i+1].linkDemo) { %>
-                            <% demoSame++; %>
-                            <div class="td demo noBot" data-link="<%= sheets[i].linkDemo %>"></div>
-                        <% } else { %>
-                            <div class="td demo" data-link="<%= sheets[i].linkDemo %>"><%= sheets[i].demo %></div>
-                            <% demoSame = 0; %>
-                        <% } %>
-                    <% } %>
-
-                    <div class="td buyingMethod"><%= sheets[i].buyingMethod %></div>
-                    <div class="td detail" data-sheet="<%= JSON.stringify(sheets[i]) %>">Detail</div>
-                    <div class="td note"><%= sheets[i].note %></div>
-                </div>
-            <% } %>
-        </div>
-        <div class="add"><i class="fa-solid fa-plus"></i></div>
-    </div>
-    <div class="getDetail">
+    <div class="sheets-container">
+        
     </div>
 
 </body>

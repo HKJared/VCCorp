@@ -4,6 +4,9 @@ const pool = require('../config/connectDB');
 const createRow = async (req, res) => {
     try {
         const newRow = req.body;
+
+        console.log(newRow);
+
         var noNewRow;
 
         if (!newRow || !newRow.website || !newRow.adsPosition || !newRow.dimensions || !newRow.platform || !newRow.demo || !newRow.buyingMethod) {
@@ -11,9 +14,9 @@ const createRow = async (req, res) => {
         }
 
         const [rows, fields] = await pool.execute(`
-                                                    SELECT idRow
+                                                    SELECT idRow, no
                                                     FROM sheets
-                                                    WHERE website = ? AND adsPosition = ? AND buyingMethod = ?
+                                                    WHERE website = ?
                                                     `, [newRow.website]);
         if (rows.length) {
             const [rows2, fields2] = await pool.execute(`
@@ -24,12 +27,12 @@ const createRow = async (req, res) => {
             if (rows2.length) {
                 return res.status(409).json({ message: 'Data had exit.' });
             }
-            noNewRow = rows2.no;
+            noNewRow = rows[0].no;
         } else {
-            const [rows2, fields2] = await pool.execute(`
-                                                        SELECT MAX(no)
-                                                        FROM sheet`);
-            noNewRow = rows2[0].no;
+            const [rows3, fields3] = await pool.execute(`
+                                                        SELECT MAX(no) as no
+                                                        FROM sheets`);
+            noNewRow = parseInt(rows3[0].no) + 1;
         }
         await pool.execute(`
                             INSERT INTO sheets(no, website, adsPosition, dimensions, platform, demo, linkDemo, buyingMethod,
@@ -53,7 +56,7 @@ const getRow = async (req, res) => {
             return res.status(400).json({ message: 'Data about the row (idRow) was not sent from the client side.'});
         }
 
-        const [row, field] = pool.execute(`
+        const [row, field] = await pool.execute(`
                                             SELECT * 
                                             FROM sheets
                                             WHERE idRow = ?
@@ -90,19 +93,37 @@ const getRows = async (req, res) => {
     }
 }
 
+const getRowsStyle = async (req, res) => {
+    try {
+        const idStyle = req.query.idStyle;
+
+        const [rows, fields] = await pool.execute(`
+                                                    SELECT *
+                                                    FROM sheets
+                                                    WHERE idStyle = ${ idStyle }
+                                                    `);
+        return res.status(200).json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred' });
+    }
+}
+
 const updateRow = async (req, res) => {
     try {
-        const updateRow = req.body.updateRow;
+        const updateRow = req.body;
 
+        console.log(updateRow);
+        
         if (!updateRow.idRow || !updateRow.no || !updateRow.website || !updateRow.adsPosition || !updateRow.dimensions || !updateRow.platform || !updateRow.demo || !updateRow.buyingMethod) {
             return res.status(400).json({   message: 'Data about the row was not sent from the client side.' })
         }
 
-        const [row, field] = pool.execute(`
+        const [row, field] = await pool.execute(`
                                             SELECT idRow
                                             FROM sheets
                                             WHERE idRow = ?
-                                            `, [row.idRow]);
+                                            `, [updateRow.idRow]);
 
         if (!row.length) {
             return res.status(404).json({   message: 'Data was not exit.' })
@@ -114,8 +135,9 @@ const updateRow = async (req, res) => {
                                 homepage = ?, crossSite = ?, detailCrossSite = ?, categories = ?, averageCTR = ?, estCTR = ?, estTraffic = ?, estImpression = ?, note = ?
                             WHERE idRow = ?
                             `, [
-                                updateRow.no, updateRow.website, updateRow.adsPosition, updateRow.dimensions, updateRow.platform, updateRow.demo, updateRow.linkDemo, updateRow.buyingMethod,
-                                updateRow.buyingMethod, updateRow.crossSite, updateRow.detailCrossSite, updateRow.categories, updateRow.averageCTR, updateRow.estCTR, updateRow.estTraffic, updateRow.estImpression, updateRow.note
+                                updateRow.no, updateRow.website, updateRow.adsPosition, updateRow.dimensions, updateRow.platform, updateRow.demo, updateRow.linkDemo || null, updateRow.buyingMethod,
+                                updateRow.homepage || null, updateRow.crossSite || null, updateRow.detailCrossSite || null, updateRow.categories || null, updateRow.averageCTR || null,
+                                updateRow.estCTR || null, updateRow.estTraffic || null, updateRow.estImpression || null, updateRow.note || null, updateRow.idRow
                             ]);
 
         return res.status(200).json({   message: 'Updated.' });
@@ -155,6 +177,20 @@ const deleteRow = async (req, res) => {
     }
 }
 
+const getStyle = async (req, res) => {
+    try {
+        const [rows, fields] = await pool.execute(`
+                                                    SELECT *
+                                                    FROM style
+                                                    `);
+        return res.status(200).json(rows)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred' });
+    }
+}
+
 module.exports = {
-    createRow, getRow, getRows, updateRow, deleteRow
+    createRow, getRow, getRows, updateRow, deleteRow,
+    getStyle, getRowsStyle
 }
