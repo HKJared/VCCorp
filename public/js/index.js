@@ -1,140 +1,453 @@
-var noCur = 1;
+var styles = [];
+var key = "";
+var isSearching = false;
 $(document).ready(function() {
-    showData();
-
-    $('#search_form').submit(async function(event){
-        event.preventDefault();
-        search();
-    });
-
-});
-
-async function showData () {
     fetch('http://localhost:3030/api/style', {
-        method: 'GET',
+        method: "GET",
         headers: {
             "Content-Type" : "application/json"
         }
     })
     .then(response => {
         if (!response.ok) {
+            showNotification(response.statusText)
             throw new Error('Network response was not ok');
         }
         return response.json();
     })
     .then(result => {
-        for (let i = 0; i < result.length; i++) {
-            const style = result[i]
-
-            const headerSheet = `
-            <div class="sheet" id="sheet${ style.idStyle }">
-                <div class="header-sheet">
-                    <div class="website">Website</div>
-                    <div class="adsPosition">Vị trí</div>
-                    <div class="dimensions">Kích thước (px)</div>
-                    <div class="platform">Nền tảng</div>
-                    <div class="demo">Demo</div>
-                    <div class="col1">${ style.detailCol1 }</div>
-                    <div class="col2">${ style.detailCol2 }</div>
-                    <div class="col3">${ style.detailCol3 }</div>
-                    <div class="col4">${ style.detailCol4 }</div>
-                    <div class="col5">${ style.detailCol5 }</div>
-                </div>
-            </div>
-            `;
-        
-            $('.sheets-container').append(headerSheet);
-        
-            fetch(`http://localhost:3030/api/rows-style?idStyle=${ style.idStyle }`, {
-                method: 'GET',
-                headers: {
-                    "Content-Type" : "application/json"
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(result2 => {
-                var curWeb = '';
-                for (let j = 0; j < result2.length; j++) {
-                    if (result2[j].website != curWeb) {
-                        curWeb = result2[j].website;
-                        var headerWeb = `
-                        <div class="headerWeb" data-link="https://${ curWeb.toLowerCase() }">${ curWeb.toUpperCase() }</div>
-                        `;
-                        $(`#sheet${ style.idStyle }`).append(headerWeb);
-                    }
-
-                    var setDemo = ``;
-        
-                    if (result2[j].demo) {
-                        const demos = result2[j].demo.split('\n');
-                        const links = result2[j].linkDemo.split('\n');
-        
-                        for (let k = 0; k < demos.length; k++) {
-                            setDemo += `
-                                <div class="linkdemo" data-link="${ links[k] }">${ demos[k] }</div>
-                            `;
-                        }
-                    }
-
-                    
-                    const bodySheet = `
-                        <div class="row-sheet">
-                            <div class="website" data-link="https://${ result2[j].website.toLowerCase() }">${ result2[j].website }</div>
-                            <div class="adsPosition">${ result2[j].adsPosition }</div>
-                            <div class="dimensions">${ result2[j].dimensions }</div>
-                            <div class="platform">${ result2[j].platform }</div>
-                            <div class="demo">${ setDemo }</div>
-                            <div class="col1">${ result2[j][style.col1] ? formatNumber(result2[j][style.col1]) : "" }</div>
-                            <div class="col2">${ result2[j][style.col2] ? formatNumber(result2[j][style.col2]) : "" }</div>
-                            <div class="col3">${ result2[j][style.col3] ? formatNumber(result2[j][style.col3]) : "" }</div>
-                            <div class="col4">${ result2[j][style.col4] ? formatNumber(result2[j][style.col4]) : "" }</div>
-                            <div class="col5">${ result2[j][style.col5] ? formatNumber(result2[j][style.col5]) : "" }</div>
-                        </div>
-                    `;
-                    $(`#sheet${ style.idStyle }`).append(bodySheet);
-                }
-
-              
-            })
-            .catch(error => {
-                console.error('There was a problem with your fetch operation:', error);
-            });
-        }
+        styles = result;
+        search();
     })
     .catch(error => {
         console.error('There was a problem with your fetch operation:', error);
     });
+});
 
-    $(document).on('click', '.headerWeb, .row-sheet .website, .linkdemo', function() {
-        const link = $(this).data('link');
-        if (link) {
-            window.open(link, '_blank');
+//click on homepage
+$(document).ready(function() {
+    $(document).on('click', '.logo-web', function(event) {
+        event.stopPropagation();
+
+        location.reload();
+    });
+
+    $(document).on('click', '.to-top-btn', function(event) {
+        event.stopPropagation();
+
+        $('html, body').animate({scrollTop: 0}, 500);
+    });
+
+    $(document).on('click', '.num-page-btn', function (event) {
+        event.stopPropagation();
+
+        var quantityPage = parseInt($(this).closest("table").find(".quantity-page").text());
+        if (quantityPage == 1) {
+            return
         }
+
+        var numPageClick = parseInt($(this).text());
+        if (numPageClick > quantityPage) {
+            return
+        }
+        
+        var currentPage = parseInt($(this).siblings(".active-page-button").text());
+        if (numPageClick === currentPage) {
+            return;
+        }
+
+        if (quantityPage <= 3 || numPageClick === 1 || numPageClick === quantityPage) {
+            $(this).siblings("button").removeClass("active-page-button").addClass("pagination-button");
+            $(this).removeClass("pagination-button").addClass("active-page-button");
+        } else {
+            var prevNum = numPageClick - 1;
+            var nextNum = numPageClick + 1;
+            
+            $(this).closest(".pagination-button-container").find(".num-page-btn").each(function(index) {
+                if (index === 0) {
+                    $(this).text(prevNum).removeClass("active-page-button").addClass("pagination-button");
+                } else if (index === 1) {
+                    $(this).text(numPageClick).removeClass("pagination-button").addClass("active-page-button");
+                } else {
+                    $(this).text(nextNum).removeClass("active-page-button").addClass("pagination-button");
+                }
+            });
+        }
+
+        changePage($(this).closest("table"), numPageClick);
+    });
+
+    $(document).on('click', '.pre', function (event) {
+        event.stopPropagation();
+
+        var quantityPage = parseInt($(this).closest("table").find(".quantity-page").text());
+        var currentPage = parseInt($(this).siblings(".active-page-button").text());
+        if (quantityPage == 1 || currentPage == 1) {
+            return
+        }
+
+        if (currentPage == 2) {
+            $(this).closest(".pagination-button-container").find(".num-page-btn").each(function(index) {
+                if (index === 0) {
+                    $(this).removeClass("pagination-button").addClass("active-page-button");
+                } else if (index === 1) {
+                    $(this).removeClass("active-page-button").addClass("pagination-button");
+                } else {
+                    $(this).removeClass("active-page-button").addClass("pagination-button");
+                }
+            });
+        } else {
+            $(this).closest(".pagination-button-container").find(".num-page-btn").each(function(index) {
+                if (index === 0) {
+                    $(this).text(currentPage-2).removeClass("active-page-button").addClass("pagination-button");
+                } else if (index === 1) {
+                    $(this).text(currentPage-1).removeClass("pagination-button").addClass("active-page-button");
+                } else {
+                    $(this).text(currentPage).removeClass("active-page-button").addClass("pagination-button");
+                }
+            });
+        }
+
+        changePage($(this).closest("table"), currentPage - 1);
+    });
+
+    $(document).on('click', '.next', function (event) {
+        event.stopPropagation();
+
+        var quantityPage = parseInt($(this).closest("table").find(".quantity-page").text());
+        var currentPage = parseInt($(this).siblings(".active-page-button").text());
+        if (quantityPage == 1 || currentPage == quantityPage) {
+            return
+        }
+
+        if (currentPage == quantityPage - 1) {
+            $(this).closest(".pagination-button-container").find(".num-page-btn").each(function(index) {
+                if (index === 0) {
+                    $(this).removeClass("active-page-button").addClass("pagination-button");
+                } else if (index === 1) {
+                    $(this).removeClass("active-page-button").addClass("pagination-button");
+                } else {
+                    $(this).removeClass("pagination-button").addClass("active-page-button");
+                }
+            });
+        } else {
+            $(this).closest(".pagination-button-container").find(".num-page-btn").each(function(index) {
+                if (index === 0) {
+                    $(this).text(currentPage).removeClass("active-page-button").addClass("pagination-button");
+                } else if (index === 1) {
+                    $(this).text(currentPage+1).removeClass("pagination-button").addClass("active-page-button");
+                } else {
+                    $(this).text(currentPage+2).removeClass("active-page-button").addClass("pagination-button");
+                }
+            });
+        }
+
+        changePage($(this).closest("table"), currentPage + 1);
+    });
+
+    $(document).on('change', '#tableSelector', function() {
+        var tableId = $(this).val();
+        var tableOffset = $("#" + tableId).offset().top - 50; 
+        $("html, body").animate({ scrollTop: tableOffset }, 500);
     });
     
+    $('#search_form').submit(function(event){
+        event.preventDefault();
+        key = $('#search_form input[type="text"]').val().toLowerCase();
+        search();
+    });
+});
+
+function showData(data, style, quantityPage) {
+    if (!data.length) {
+        return;
+    }
+
+    var headerTableHTML = `
+        <tr class="header-table" id="header_table_${ style.idStyle }">
+            <th class="website">Website</th>
+            <th class="adsPosition">Vị trí</th>
+            <th class="dimensions">Kích thước</th>
+            <th class="platform">Nền tảng</th>
+            <th class="demo">Demo</th>
+            <th class="col1">${ style.detailCol1 }</th>
+            <th class="col2">${ style.detailCol2 }</th>
+            <th class="col3">${ style.detailCol3 }</th>
+            <th class="col4">${ style.detailCol4 }</th>
+            <th class="col5">${ style.detailCol5 }</th>
+        </tr>
+    `;
+
+    var footTableHTML = `
+        <tr>    
+            <td colspan="10">
+                <div class="pagination-container">
+                    <div class="pagination-button-container">
+                        <button class="pagination-button pre"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="num-page-btn active-page-button">1</button>
+                        <button class="num-page-btn pagination-button">2</button>
+                        <button class="num-page-btn pagination-button">3</button>
+                        <button class="pagination-button next"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <form class="input-page">
+                        <input type="text">
+                        / <span class="quantity-page">${ quantityPage }</span> page
+                        <button>Go</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    `;
+
+    $(`#table_${ style.idStyle } thead`).append(headerTableHTML);
+
+    $(`#table_${ style.idStyle } tfoot`).append(footTableHTML);
+
+    var currentWebsite = "";
+    var rowspanWebsite = 0, rowspanPosition = 0, rowspanPlatform = 0, rowspanDemo = 0;
+
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].website != currentWebsite) {            
+            currentWebsite = data[i].website;
+
+            var headerWebsiteHTML = `
+                <tr class="header-website" id="header_table_${ data[i].website }" title="${ data[i].url }">
+                    <th colspan="10"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website.toUpperCase() }</a></th>
+                </tr>
+            `;
+            $(`#table_${ style.idStyle } tbody`).append(headerWebsiteHTML);
+        }
+
+        var demos = data[i].demo.split('\n');
+        var links = data[i].linkDemo.split('\n');
+        var setDemo = "";
+        for (let j = 0; j < demos.length; j++) {
+            setDemo += `
+                <div class="linkdemo"><a href="${ links[j] }" target="_blank" rel="noopener noreferrer">${ demos[j] }</a></div>
+            `;
+        }
+
+        // merge website
+        while(i + rowspanWebsite < data.length && data[i + rowspanWebsite].website == data[i].website) {
+            rowspanWebsite ++;
+        }
+
+        var setWebsiteHTML = ``
+        if (data[i-1] && data[i-1].website == data[i].website) {
+            setWebsiteHTML =  ``;
+        } else {
+            setWebsiteHTML = `<td class="website" rowspan="${ rowspanWebsite }" title="${ data[i].url }"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website }</a></td>`;
+        }
+        rowspanWebsite = 0;
+        
+        // merge adsPosition and dimensions
+        while(i + rowspanPosition < data.length && data[i + rowspanPosition].adsPosition == data[i].adsPosition && data[i + rowspanPosition].dimensions == data[i].dimensions) {
+            rowspanPosition ++;
+        }
+        var setPositionDimensionsHTML = ``;
+        if (data[i-1] && data[i-1].adsPosition == data[i].adsPosition && data[i-1].dimensions == data[i].dimensions) {
+            setPositionDimensionsHTML =  ``;
+        } else {
+            setPositionDimensionsHTML = `<td class="adsPosition" rowspan="${ rowspanPosition }">${ data[i].adsPosition }</td>
+                                        <td class="dimensions" rowspan="${ rowspanPosition }">${ data[i].dimensions }</td>`;
+        }
+        rowspanPosition = 0;
+
+        // merge platform
+        while(i + rowspanPlatform < data.length && data[i + rowspanPlatform].platform == data[i].platform) {
+            rowspanPlatform ++;
+        }
+        var setPlatformHTML = ``;
+        if (data[i-1] && data[i-1].platform == data[i].platform) {
+            setPlatformHTML =  ``;
+        } else {
+            setPlatformHTML = `<td class="platform" rowspan="${ rowspanPlatform }">${ data[i].platform }</td>`;
+        }
+        rowspanPlatform = 0;
+
+        // merge demo
+        console.log(rowspanDemo)
+        while(i + rowspanDemo < data.length && data[i + rowspanDemo].linkDemo == data[i].linkDemo && data[i + rowspanDemo].demo == data[i].demo) {
+            rowspanDemo ++;
+        }
+        console.log(rowspanDemo)
+        console.log(data[i]);
+        var setDemoHTML = ``;
+        if (data[i-1] && data[i-1].linkDemo == data[i].linkDemo) {
+            setDemoHTML =  ``;
+        } else {
+            setDemoHTML = `<td class="demo" rowspan="${ rowspanDemo }"><div>${ setDemo }</div></td>`;
+        }
+        rowspanDemo = 0;
+
+        var row = `
+        <tr class="row-table">
+            ${ setWebsiteHTML }
+            ${ setPositionDimensionsHTML }
+            ${ setPlatformHTML }
+            ${ setDemoHTML }
+            <td class="col1">${ data[i][style.col1] ? numterToString(data[i][style.col1]) : "" }</td>
+            <td class="col2">${ data[i][style.col2] ? numterToString(data[i][style.col2]) : "" }</td>
+            <td class="col3">${ data[i][style.col3] ? numterToString(data[i][style.col3]) : "" }</td>
+            <td class="col4">${ data[i][style.col4] ? numterToString(data[i][style.col4]) : "" }</td>
+            <td class="col5">${ data[i][style.col5] ? numterToString(data[i][style.col5]) : "" }</td>
+        </tr>
+        `;
+        $(`#table_${ style.idStyle } tbody`).append(row);
+    
+    }
 }
 
-function formatNumber (num) {
-    if (typeof(num) == "number") {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+function numterToString (num) {
+    if (typeof(num) == 'number' || num.includes('000')) {
+        return num.toString().replace(/[,. ]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     }
-    return num;
+    return num
 }
 
 function search () {
-    var searchValue = $('#search_form input[type="text"]').val().toLowerCase();
-    $('.headerWeb').hide();
-    $('.row-sheet').hide();
-    $('.headerWeb').filter(function() {
-        return $(this).text().toLowerCase().includes(searchValue); 
-    }).show();
-    $('.row-sheet .website').filter(function() {
-        return $(this).text().toLowerCase().includes(searchValue); 
-    }).closest('.row-sheet').show();
+    $(".table").each(function() {
+        $(this).find("thead").empty();
+        $(this).find("tbody").empty();
+        $(this).find("tfoot").empty();
+    });
+
+    for (let i = 0; i < styles.length; i++) {
+        fetch(`http://localhost:3030/api/rows-style?idStyle=${ styles[i].idStyle }&key=${ encodeURIComponent(key) }`, {
+            method: "GET",
+            headers: {
+                "Content-Type" : "application/json"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                showNotification(response.statusText)
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(result => {
+            var data = result.data;
+            var quantityPage = result.quantityPage
+            showData(data, styles[i], quantityPage);
+        })
+        .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+    }
+}
+
+function changePage (table, page) {
+
+    var idStyle = table.attr('id').replace("table_", "");
+
+    table.find("tbody").empty();
+    fetch(`http://localhost:3030/api/rows-style?idStyle=${ idStyle }&key=${ encodeURIComponent(key) }&page=${ page }`, {
+            method: "GET",
+            headers: {
+                "Content-Type" : "application/json"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                showNotification(response.statusText)
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(result => {
+            var data = result.data;
+
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].website != currentWebsite) {            
+                    currentWebsite = data[i].website;
+        
+                    var headerWebsiteHTML = `
+                        <tr class="header-website" id="header_table_${ data[i].website }" title="${ data[i].url }">
+                            <th colspan="10"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website.toUpperCase() }</a></th>
+                        </tr>
+                    `;
+                    $(`#table_${ style.idStyle } tbody`).append(headerWebsiteHTML);
+                }
+        
+                var demos = data[i].demo.split('\n');
+                var links = data[i].linkDemo.split('\n');
+                var setDemo = "";
+                for (let j = 0; j < demos.length; j++) {
+                    setDemo += `
+                        <div class="linkdemo"><a href="${ links[j] }" target="_blank" rel="noopener noreferrer">${ demos[j] }</a></div>
+                    `;
+                }
+        
+                // merge website
+                while(i + rowspanWebsite < data.length && data[i + rowspanWebsite].website == data[i].website) {
+                    rowspanWebsite ++;
+                }
+        
+                var setWebsiteHTML = ``
+                if (data[i-1] && data[i-1].website == data[i].website) {
+                    setWebsiteHTML =  ``;
+                } else {
+                    setWebsiteHTML = `<td class="website" rowspan="${ rowspanWebsite }" title="${ data[i].url }"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website }</a></td>`;
+                    rowspanWebsite = 0;
+                }
+                
+                // merge adsPosition and dimensions
+                while(i + rowspanPosition < data.length && data[i + rowspanPosition].adsPosition == data[i].adsPosition) {
+                    rowspanPosition ++;
+                }
+                var setPositionDimensionsHTML = ``;
+                if (data[i-1] && data[i-1].adsPosition == data[i].adsPosition) {
+                    setPositionDimensionsHTML =  ``;
+                } else {
+                    setPositionDimensionsHTML = `<td class="adsPosition" rowspan="${ rowspanPosition }">${ data[i].adsPosition }</td>
+                                                <td class="dimensions" rowspan="${ rowspanPosition }">${ data[i].dimensions }</td>`;
+                    rowspanPosition = 0;
+                }
+        
+                // merge platform
+                while(i + rowspanPlatform < data.length && data[i + rowspanPlatform].platform == data[i].platform) {
+                    rowspanPlatform ++;
+                }
+                var setPlatformHTML = ``;
+                if (data[i-1] && data[i-1].platform == data[i].platform) {
+                    setPlatformHTML =  ``;
+                } else {
+                    setPlatformHTML = `<td class="platform" rowspan="${ rowspanPlatform }">${ data[i].platform }</td>`;
+                    rowspanPlatform = 0;
+                }
+        
+                // merge demo
+                while(i + rowspanDemo < data.length && data[i + rowspanDemo].linkDemo == data[i].linkDemo) {
+                    rowspanDemo ++;
+                }
+                var setDemoHTML = ``;
+                if (data[i-1] && data[i-1].linkDemo == data[i].linkDemo) {
+                    setDemoHTML =  ``;
+                } else {
+                    setDemoHTML = `<td class="demo" rowspan="${ rowspanDemo }"><div>${ setDemo }</div></td>`;
+                    rowspanDemo = 0;
+                }
+        
+                var row = `
+                <tr class="row-table">
+                    ${ setWebsiteHTML }
+                    ${ setPositionDimensionsHTML }
+                    ${ setPlatformHTML }
+                    ${ setDemoHTML }
+                    <td class="col1">${ data[i][style.col1] ? numterToString(data[i][style.col1]) : "" }</td>
+                    <td class="col2">${ data[i][style.col2] ? numterToString(data[i][style.col2]) : "" }</td>
+                    <td class="col3">${ data[i][style.col3] ? numterToString(data[i][style.col3]) : "" }</td>
+                    <td class="col4">${ data[i][style.col4] ? numterToString(data[i][style.col4]) : "" }</td>
+                    <td class="col5">${ data[i][style.col5] ? numterToString(data[i][style.col5]) : "" }</td>
+                </tr>
+                `;
+                $(`#table_${ idStyle } tbody`).append(row);
+            
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
 }
 

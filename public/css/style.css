@@ -1,3 +1,8 @@
+:root{
+  --mainColor : #1d71be;
+  --borderColor: #d6d6d6;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
@@ -6,22 +11,58 @@ body {
   align-items: center;
 }
 
+.blur {
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.header-container {
+  display: flex;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background-color: #fff;
+  border-bottom: 1px solid var(--borderColor);
+  height: 50px;
+  z-index: 999;
+}
+
+.logo-web {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.logo-web img {
+  margin-left: 10px;
+  max-height: 40px;
+  width: auto;
+}
+
 .search {
   margin-top: 10px;
-  display: flex;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  display: inline-block;
+  position: fixed;
   height: 30px;
-  border-radius: 15px;
-  box-shadow: 0px 0px 3px #073763;
+  overflow: hidden;
+  border: 1px solid #073763;
+  border-radius: 10px;
 }
 
 .search input {
   height: 30px;
-  width: 330px;
+  width: 530px;
   border: 0;
-  border-radius: 15px 0px 0px 15px;
-  font-size: 20px;
+  font-size: 17px;
   padding-left: 20px;
   padding-block: 0;
+}
+
+.search input::placeholder {
+  opacity: 0.5;
 }
 
 .search input:focus {
@@ -33,14 +74,154 @@ body {
   vertical-align: middle;
 }
 
-.search button {
+.search form button {
   height: 30px;
   width: 30px;
   border: 0;
-  border-radius: 0px 15px 15px 0px;
-  background-color: #073763;
+  color: #073763;
+  background-color: #f9f9f9;
+  cursor: pointer;
 }
 
-.search button i {
+.notification {
+  position: fixed;
+  top: 50px;
+  right: -350px;
+  width: 300px;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  transition: right 0.5s ease; 
+  z-index: 9999;
+}
+
+.right-slide {
+  right: 10px; 
+}
+
+.to-top-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  z-index: 999;
+  cursor: pointer;
+  user-select: none;
+  font-size: 25px;
+  border: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: #fff;
+  color: var(--mainColor);
+  box-shadow: 0px 0px 5px #c7c7c7;
+}
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+}
+
+.pagination-button-container {
+  display: flex;
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+
+.pagination-button-container .pagination-button  {
+  width: 30px;
+  height: 30px;
+  margin-left: 2px;
+  margin-right: 2px;
+  font-size: 15px;
+  cursor: pointer;
+  background-color: #fff;
+  border: 0;
+  user-select: none;
+}
+
+.active-page-button {
+  width: 30px;
+  height: 30px;
+  margin-left: 2px;
+  margin-right: 2px;
+  font-size: 15px;
+  cursor: pointer;
+  background-color: #54abf1;
   color: #fff;
+  border: 0;
+  user-select: none;
+}
+
+.pagination-button-container button:hover {
+  background-color: #54abf1;
+  color: #fff;
+}
+
+.input-page input {
+  width: 25px;
+  height: 25px;
+  font-size: 15px;
+  text-align: center;
+}
+
+.input-page button {
+  border: 0;
+  font-size: 15px;
+  color: var(--mainColor);
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.to-table-container {
+  display: flex;
+  white-space: pre;
+  align-items: center;
+  height: 50px;
+  position: fixed;
+  right: 50px;
+}
+
+.to-table-container span {
+  color: var(--mainColor);
+}
+
+.to-table-container select {
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.to-table-container select:focus {
+  outline: none; /* Ẩn border khi phần tử được chọn */
+}
+
+.admin-icon a {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-left: 50px;
+  font-size: 30px;
+  color: #000;
+  text-decoration: none;
+}
+
+.window {
+  display: none;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #296c96;
+  color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  z-index: 1000;
+  overflow: hidden;
+  box-shadow: 0px 0px 5px #c7c7c7;
 }

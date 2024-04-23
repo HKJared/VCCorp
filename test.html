@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <input type="text" id="numberInput">
+</body>
+<script>
+function formatNumber(input) {
+    // Loại bỏ tất cả các ký tự không phải số từ chuỗi đầu vào
+    var number = input.replace(/\D/g, '');
+
+    // Chia chuỗi thành các phần có độ dài tối đa là 3 ký tự và ngăn cách bằng dấu cách
+    var formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+    return formattedNumber;
+}
+
+$(document).ready(function() {
+    $('#numberInput').on('input', function(event) {
+        var inputValue = $(this).val();
+        $(this).val(formatNumber(inputValue));
+    });
+});
+</script>
+</html>

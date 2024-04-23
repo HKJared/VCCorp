@@ -4,47 +4,47 @@ const pool = require('../config/connectDB');
 const createRow = async (req, res) => {
     try {
         const newRow = req.body;
+        var idWebsite;
 
-        console.log(newRow);
-
-        var noNewRow;
-
-        if (!newRow || !newRow.website || !newRow.adsPosition || !newRow.dimensions || !newRow.platform || !newRow.demo || !newRow.buyingMethod) {
+        if (!newRow.website || !newRow.adsPosition || !newRow.dimensions || !newRow.platform || !newRow.demo) {
             return res.status(400).json({ message: 'New data was not sent from the client side.' })
         }
 
         const [rows, fields] = await pool.execute(`
-                                                    SELECT idRow, no
-                                                    FROM sheets
-                                                    WHERE website = ?
+                                                    SELECT s.idStyle, s.idWebsite
+                                                    FROM sheets as s, website as w
+                                                    WHERE w.name = ? AND w.idWebsite = s.idWebsite
                                                     `, [newRow.website]);
-        if (rows.length) {
-            const [rows2, fields2] = await pool.execute(`
-                                                    SELECT idRow, no
-                                                    FROM sheets
-                                                    WHERE website = ? AND adsPosition = ? AND buyingMethod = ?
-                                                    `, [newRow.website, newRow.adsPosition, newRow.buyingMethod]);
-            if (rows2.length) {
-                return res.status(409).json({ message: 'Data had exit.' });
-            }
-            noNewRow = rows[0].no;
-        } else {
-            const [rows3, fields3] = await pool.execute(`
-                                                        SELECT MAX(no) as no
-                                                        FROM sheets`);
-            noNewRow = parseInt(rows3[0].no) + 1;
+        if (rows.length && rows[0].idStyle != newRow.idStyle) {
+            return res.status(400).json({ message: 'Website ' + newRow.website + ' is already in another table.' })
         }
-        await pool.execute(`
-                            INSERT INTO sheets(no, website, adsPosition, dimensions, platform, demo, linkDemo, buyingMethod,
-                                homepage, crossSite, detailCrossSite, categories, averageCTR, estCTR, estTraffic, estImpression, note)
-                            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            `, [ noNewRow, newRow.website, newRow.adsPosition, newRow.dimensions, newRow.platform, newRow.demo, newRow.linkDemo, newRow.buyingMethod,
-                                newRow.homepage, newRow.crossSite, newRow.detailCrossSite, newRow.categories, newRow.averageCTR, newRow.estCTR, newRow.estTraffic, newRow.estImpression, newRow.note ]);
 
-        return res.status(200).json({ message: "Added successfully."})
+        if (rows.length) {
+            idWebsite = rows[0].idWebsite;
+        } else {
+            const [newWebsite, none2] = await pool.execute(`
+                                                            INSERT INTO website (name, url)
+                                                            values (?, ?)
+                                                            `, [ newRow.website, newRow.url ]);
+            idWebsite = newWebsite.insertId;
+        }
+
+        const [rows2, fields2] = await pool.execute(`
+                                                        SELECT col1, col2, col3, col4, col5
+                                                        FROM style
+                                                        WHERE idStyle = ?
+                                                        `, [ newRow.idStyle ]);
+        const [result, none] = await pool.execute(`
+                                                    INSERT INTO sheets (idWebsite, adsPosition, dimensions, platform, demo, linkDemo,
+                                                        ${ rows2[0].col1 }, ${ rows2[0].col2 }, ${ rows2[0].col3 }, ${ rows2[0].col4 }, ${ rows2[0].col5 }, idStyle)
+                                                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                                    `, [ idWebsite, newRow.adsPosition, newRow.dimensions, newRow.platform, newRow.demo, newRow.linkDemo,
+                                                        newRow.col1 || null, newRow.col2 || null, newRow.col3 || null, newRow.col4 || null, newRow.col5 || null, newRow.idStyle ]);
+        const idNewRow = result.insertId;
+        return res.status(200).json({ message: "Added successfully.", idNewRow: result.insertId })
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred' });
+        return res.status(500).json({ error: 'An error occurred' });
     }
 }
 
@@ -72,50 +72,40 @@ const getRow = async (req, res) => {
     }
 }
 
-const getRows = async (req, res) => {
-    try {
-        const key = req.query.key;
-
-        if (!key) {
-            return res.status(400).json({ message: 'Data about the row (website) was not sent from the client side.'});
-        }
-
-        const [rows, fields] = await pool.execute(`
-                                            SELECT idRow, no, website, adsPosition, dimensions, platform, demo, linkDemo, buyingMethod
-                                            FROM sheets
-                                            WHERE website LIKE '%${key}%'
-                                            ORDER BY no, platform, linkDemo, adsPosition`);
-
-        return res.status(200).json({   data: rows  });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred' });
-    }
-}
-
 const getRowsStyle = async (req, res) => {
     try {
         const idStyle = req.query.idStyle;
+        const key = req.query.key;
+        const page = parseInt(req.query.page);
+
+        const [count] = await pool.execute(`
+            SELECT COUNT(*) as cnt
+            FROM sheets
+            WHERE idStyle = ${ idStyle }
+        `);
+
+        var quantityPage = count[0].cnt % 25 ? Math.floor(count[0].cnt / 25) + 1 : Math.floor(count[0].cnt / 25);
 
         const [rows, fields] = await pool.execute(`
-                                                    SELECT *
-                                                    FROM sheets
-                                                    WHERE idStyle = ${ idStyle }
-                                                    `);
-        return res.status(200).json(rows);
+            SELECT s.*, w.name as website, w.url as url
+            FROM sheets as s, website as w
+            WHERE s.idStyle = ${ idStyle } AND s.idWebsite = w.idWebsite AND w.name LIKE '%${ key || "" }%'
+            ORDER BY s.idWebsite, s.platform, s.demo, s.adsPosition, s.created_at
+            LIMIT 20
+            OFFSET ${ (page - 1) * 20 || 0 }
+        `);
+        return res.status(200).json({ data: rows, quantityPage: quantityPage });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred' });
+        return res.status(500).json({ error: 'An error occurred' });
     }
 }
 
 const updateRow = async (req, res) => {
     try {
         const updateRow = req.body;
-
-        console.log(updateRow);
         
-        if (!updateRow.idRow || !updateRow.no || !updateRow.website || !updateRow.adsPosition || !updateRow.dimensions || !updateRow.platform || !updateRow.demo || !updateRow.buyingMethod) {
+        if (!updateRow.idRow || !updateRow.website || !updateRow.adsPosition || !updateRow.dimensions || !updateRow.platform  || !updateRow.demo || !updateRow.linkDemo) {
             return res.status(400).json({   message: 'Data about the row was not sent from the client side.' })
         }
 
@@ -129,21 +119,29 @@ const updateRow = async (req, res) => {
             return res.status(404).json({   message: 'Data was not exit.' })
         }
 
+        const [rows2, fields2] = await pool.execute(`
+                                                    SELECT *
+                                                    FROM style
+                                                    WHERE idStyle = ?
+                                                    `, [updateRow.idStyle]);
+
+        const style = rows2[0]
+
         await pool.execute(`
                             UPDATE sheets 
-                            SET no = ?, website = ?, adsPosition = ?, dimensions = ?, platform = ?, demo = ?, linkDemo = ?, buyingMethod = ?,
-                                homepage = ?, crossSite = ?, detailCrossSite = ?, categories = ?, averageCTR = ?, estCTR = ?, estTraffic = ?, estImpression = ?, note = ?
+                            SET website = ?, adsPosition = ?, dimensions = ?, platform = ?, demo = ?, linkDemo = ?,
+                                ${ style.col1 } = ?, ${ style.col2 } = ?, ${ style.col3 } = ?, ${ style.col4 } = ?, ${ style.col5 } = ?
                             WHERE idRow = ?
                             `, [
-                                updateRow.no, updateRow.website, updateRow.adsPosition, updateRow.dimensions, updateRow.platform, updateRow.demo, updateRow.linkDemo || null, updateRow.buyingMethod,
-                                updateRow.homepage || null, updateRow.crossSite || null, updateRow.detailCrossSite || null, updateRow.categories || null, updateRow.averageCTR || null,
-                                updateRow.estCTR || null, updateRow.estTraffic || null, updateRow.estImpression || null, updateRow.note || null, updateRow.idRow
+                                updateRow.website, updateRow.adsPosition, updateRow.dimensions, updateRow.platform, updateRow.demo, updateRow.linkDemo,
+                                updateRow.col1 || null, updateRow.col2 || null, updateRow.col3 || null, updateRow.col4 || null, updateRow.col5 || null,
+                                updateRow.idRow
                             ]);
 
         return res.status(200).json({   message: 'Updated.' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred' });
+        return res.status(500).json({ error: 'An error occurred' });
     }
 }
 
@@ -186,11 +184,11 @@ const getStyle = async (req, res) => {
         return res.status(200).json(rows)
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred' });
+        return res.status(500).json({ error: 'An error occurred' });
     }
 }
 
 module.exports = {
-    createRow, getRow, getRows, updateRow, deleteRow,
+    createRow, getRow, updateRow, deleteRow,
     getStyle, getRowsStyle
 }

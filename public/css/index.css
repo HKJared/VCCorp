@@ -1,49 +1,68 @@
+:root{
+  --mainColor : #1d71be;
+  --borderColor: #d6d6d6;
+  --headerWeb: #ccc;
+}
+
 .sheets-container {
   display: flex;
   flex-direction: column;
-  margin-top: 5px;
+  margin-top: 50px;
+  margin-bottom: 15px;
+  scrollbar-width: none;
 }
 
-.sheets-container .header-sheet {
-  display: flex;
-  background-color: #073763;
+table {
+  margin-bottom: 40px;
+  overflow: hidden;
+  background-color: var(--borderColor);
+}
+
+thead {
+  background-color: var(--mainColor);
   color: #fff;
 }
 
-.sheets-container .row-sheet {
-  display: flex;
+th {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
-.sheets-container .row-sheet > * {
+tbody {
+  background-color: #fff;
+}
+
+th, tbody td {
+  white-space: pre-wrap; 
+  text-align: center;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+.demo div {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  border: 1px solid #d6d6d6;
-  white-space: pre-wrap;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  font-size: 13px;
-  min-height: 30px;
 }
 
-.sheets-container .header-sheet > * {
-  display: flex;
+tfoot td {
+  background-color: #fff;
+}
+
+.header-website {
+  width: 100%;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  border: 1px solid #d6d6d6;
-  white-space: pre;
-  overflow: hidden;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  font-size: 13px;
-  min-height: 30px;
+  cursor: pointer;
+  background-color: var(--borderColor);
+}
+
+.header-website a {
+  color: #000;
+  text-decoration: none;
+  font-weight:bold;
 }
 
 .website {
-  overflow: hidden;
   width: 80px;
 }
 
@@ -83,20 +102,10 @@
   width: 70px;
 }
 
-.row-sheet .website, .row-sheet .demo {
-  font-size: 13px;
+.website a , .linkdemo a {
   font-style: italic;
   text-decoration: underline;
-  font-weight: bold;
-  color: rgb(38, 55, 133);
+  color: var(--mainColor);
   cursor: pointer;
 }
 
-.headerWeb {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 25px;
-  background-color: #c5c5c5;
-  cursor: pointer;
-}
