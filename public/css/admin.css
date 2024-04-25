@@ -23,20 +23,17 @@ thead {
   color: #fff;
 }
 
-th {
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
 tbody {
   background-color: #fff;
 }
 
 th, tbody td {
-  white-space: pre-wrap; 
   text-align: center;
   font-size: 14px;
   word-wrap: break-word;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  white-space: pre;
 }
 
 .demo div {
@@ -140,7 +137,7 @@ tfoot td {
 }
 
 .action-container .update-btn {
-  color: #309b39;
+  color: #c7d017;
 }
 
 .action-container .delete-btn {
@@ -159,7 +156,7 @@ tfoot td {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  width: 700px;
+  width: 900px;
   position: relative;
 }
 
@@ -182,7 +179,7 @@ tfoot td {
 
 textarea,
 #col5 {
-  width: 700px;
+  width: 900px;
   box-sizing: border-box;
   font-size: 18px;
   text-align: center;
@@ -253,22 +250,24 @@ textarea,
 }
 
 .demo-container .content, .demo-container .link-demo {
-  font-size: 15px;
-  height: 22px;
+  font-size: 17px;
+  height: 24px;
   border-radius: 5px;
 }
 
 .demo-container .content {
-  width: 160px;
+  width: 260px;
+  margin-right: 5px;
 }
 
 .demo-container .link-demo {
-  width: 500px;
+  width: 590px;
+  margin-left: 5px;
 }
 
 .demo-container .remove-demo {
   position: fixed;
-  right: 26px;
+  right: 32px;
   background-color: #fff;
   border: 0;
   cursor: pointer;
@@ -284,10 +283,10 @@ textarea,
   transform: translateX(-50%);
 }
 
-.save {
-  width: 80px;
+.save, .save-new-website, .save-update-row, .save-new-table {
+  width: 120px;
   margin-top: 8px;
-  margin-left: 620px;
+  margin-left: 780px;
   padding-top: 3px;
   border: 0;
   border-radius: 12px;
@@ -297,14 +296,144 @@ textarea,
   cursor: pointer;
 }
 
-.save:hover {
+.save:hover, .save-new-website:hover, .save-update-row:hover, .save-new-table:hover {
   background-color: #4188b4;
 }
 
-.new-row {
-  transition: border-color 0.5s ease;
+.add-row-new-website {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin-left: 150px;
+  font-size: 25px;
+  color: #0cc53a;
+  cursor: pointer;
+  user-select: none;
+  transition: font-size 0.1s ease;
 }
 
-.new-row.highlight {
-  border: 2px solid red;
+.add-row-new-website:hover {
+  font-size: 25.5px;
 }
+
+.add-row-new-website:active {
+  font-size: 25px;
+}
+
+.add-new-table {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin-left: 25px;
+  font-size: 30px;
+  color: var(--mainColor);
+  cursor: pointer;
+  user-select: none;
+  transition: font-size 0.1s ease;
+}
+
+.add-new-table:hover {
+  font-size: 31px;
+}
+
+.add-new-table:active {
+  font-size: 30px;
+}
+
+.select-table-to-add {
+  justify-content: left;
+}
+
+.select-table-to-add span {
+  width: 80px;
+}
+
+.select-table-to-add h3 {
+  position: fixed;
+  width: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#select_table_to_add {
+  width: 80px;
+  height: 22px;
+  font-size: 15px;
+  text-align: center;
+  justify-content: center;
+}
+
+@keyframes outstanding_green {
+  0% {
+    background-color: rgb(193, 245, 188);
+  }
+  25% {
+    background-color: rgb(220, 243, 218);
+  }
+  50% {
+    background-color: rgb(243, 243, 243);
+  }
+  75% {
+    background-color: rgb(220, 243, 218);
+  }
+  100% {
+    background-color: rgb(193, 245, 188);
+  }
+}
+
+.highlight-green {
+  animation: outstanding_green 2s infinite;
+}
+
+@keyframes outstanding_yellow {
+  0% {
+    background-color: rgb(249, 250, 219);
+  }
+  25% {
+    background-color: rgb(254, 255, 182);
+  }
+  50% {
+    background-color: rgb(255, 255, 255);
+  }
+  75% {
+    background-color: rgb(254, 255, 182);
+  }
+  100% {
+    background-color: rgb(254, 255, 182);
+  }
+}
+
+.highlight-yellow {
+  animation: outstanding_yellow 2s infinite;
+}
+
+
+
+.input-data-col-container {
+  margin-top: 35px;
+  border: 1px solid #fff;
+  border-radius: 13px;
+  padding: 10px;
+}
+
+.input-data-col-container:hover {
+  background-color: #3f89b6;
+}
+
+.input-data-col-container > span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+}
+
+.input-content-column {
+  width: 600px;
+}
+
+.input-data-type {
+  width: 300px;
+}
+

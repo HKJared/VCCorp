@@ -15,17 +15,23 @@
             <img src="image/logo.png" alt="" srcset="">
         </div>
         <div class="admin-icon">
-            <a href="/admin">
-                <i class="fa-solid fa-user-gear"></i>
+            <a href="/">
+                <i class="fa-solid fa-user"></i>
             </a>
+        </div>
+        <div class="price-range" title="Khoảng giá">
+            <input type="text" id="min_price" class="price" placeholder="Giá thấp nhất">
+            <span><i class="fa-solid fa-minus"></i></span>
+            <input type="text" id="max_price" class="price" placeholder="Giá cao nhất">
         </div>
         <div class="search">
             <form action="" id="search_form">
-                <input type="text" placeholder="Website">
+                <input type="text">
                 <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
             </form>
         </div>
-        <div class=""><i class="fa-solid fa-user-plus"></i></div>
+        <div class="add-row-new-website" title="Thêm dữ liệu mới"><i class="fa-solid fa-file-circle-plus"></i></div>
+        <div class="add-new-table" title="Thêm bảng mới"><i class="fa-regular fa-calendar-plus"></i></div>
         <div class="to-table-container">
             <span>Go to </span>
             <select id="tableSelector">
@@ -71,7 +77,10 @@
         </table>
     </div>
     <button class="to-top-btn"><i class="fa-solid fa-chevron-up"></i></button>
-    <div class="window"></div>
+    <div class="window">
+        
+    </div>
+    <div class="description"></div>
     <div id="notification" class="notification">
         <span id="notificationText"></span>
     </div>

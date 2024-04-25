@@ -1,6 +1,7 @@
 var styles = [];
 var key = "";
 var isSearching = false;
+var minPrice = 0, maxPrice = 10000000000;
 $(document).ready(function() {
     fetch('http://localhost:3030/api/style', {
         method: "GET",
@@ -9,11 +10,13 @@ $(document).ready(function() {
         }
     })
     .then(response => {
-        if (!response.ok) {
-            showNotification(response.statusText)
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
+        return response.json().then(data => {
+            if (!response.ok) {
+                showNotification(data.message);
+                throw new Error('Network response was not ok');
+            }
+            return data;
+        });
     })
     .then(result => {
         styles = result;
@@ -120,7 +123,7 @@ $(document).ready(function() {
             return
         }
 
-        if (currentPage == quantityPage - 1) {
+        if (currentPage == quantityPage - 1 && quantityPage > 2) {
             $(this).closest(".pagination-button-container").find(".num-page-btn").each(function(index) {
                 if (index === 0) {
                     $(this).removeClass("active-page-button").addClass("pagination-button");
@@ -155,6 +158,32 @@ $(document).ready(function() {
         event.preventDefault();
         key = $('#search_form input[type="text"]').val().toLowerCase();
         search();
+    });
+
+    $(document).on('input', '.price', function(event) {
+        var inputValue = $(this).val();
+
+        $(this).val(formatNumber(inputValue));
+    });
+
+    $(document).on('input', '#min_price', function() {
+        var minPriceInput = parseInt($(this).val().replace(/\s/g, ''), 10);
+        if ($(this).val() == '') {
+            minPriceInput = 0;
+        }
+        if (!isNaN(minPriceInput)) {
+            minPrice = minPriceInput;
+        }
+    });
+
+    $(document).on('input', '#max_price', function() {
+        var maxPriceInput = parseInt($(this).val().replace(/\s/g, ''), 10);
+        if ($(this).val() == '') {
+            maxPriceInput = 10000000000;
+        }
+        if (!isNaN(maxPriceInput)) {
+            maxPrice = maxPriceInput;
+        }
     });
 });
 
@@ -241,11 +270,11 @@ function showData(data, style, quantityPage) {
         rowspanWebsite = 0;
         
         // merge adsPosition and dimensions
-        while(i + rowspanPosition < data.length && data[i + rowspanPosition].adsPosition == data[i].adsPosition && data[i + rowspanPosition].dimensions == data[i].dimensions) {
+        while(i + rowspanPosition < data.length && data[i + rowspanPosition].adsPosition == data[i].adsPosition && data[i + rowspanPosition].dimensions == data[i].dimensions && data[i + rowspanPosition].website == data[i].website) {
             rowspanPosition ++;
         }
         var setPositionDimensionsHTML = ``;
-        if (data[i-1] && data[i-1].adsPosition == data[i].adsPosition && data[i-1].dimensions == data[i].dimensions) {
+        if (data[i-1] && data[i-1].adsPosition == data[i].adsPosition && data[i-1].dimensions == data[i].dimensions && data[i-1].website == data[i].website) {
             setPositionDimensionsHTML =  ``;
         } else {
             setPositionDimensionsHTML = `<td class="adsPosition" rowspan="${ rowspanPosition }">${ data[i].adsPosition }</td>
@@ -254,11 +283,11 @@ function showData(data, style, quantityPage) {
         rowspanPosition = 0;
 
         // merge platform
-        while(i + rowspanPlatform < data.length && data[i + rowspanPlatform].platform == data[i].platform) {
+        while(i + rowspanPlatform < data.length && data[i + rowspanPlatform].platform == data[i].platform && data[i + rowspanPlatform].website == data[i].website) {
             rowspanPlatform ++;
         }
         var setPlatformHTML = ``;
-        if (data[i-1] && data[i-1].platform == data[i].platform) {
+        if (data[i-1] && data[i-1].platform == data[i].platform && data[i-1].website == data[i].website) {
             setPlatformHTML =  ``;
         } else {
             setPlatformHTML = `<td class="platform" rowspan="${ rowspanPlatform }">${ data[i].platform }</td>`;
@@ -266,12 +295,9 @@ function showData(data, style, quantityPage) {
         rowspanPlatform = 0;
 
         // merge demo
-        console.log(rowspanDemo)
-        while(i + rowspanDemo < data.length && data[i + rowspanDemo].linkDemo == data[i].linkDemo && data[i + rowspanDemo].demo == data[i].demo) {
+        while(i + rowspanDemo < data.length && data[i + rowspanDemo].linkDemo == data[i].linkDemo) {
             rowspanDemo ++;
         }
-        console.log(rowspanDemo)
-        console.log(data[i]);
         var setDemoHTML = ``;
         if (data[i-1] && data[i-1].linkDemo == data[i].linkDemo) {
             setDemoHTML =  ``;
@@ -313,7 +339,7 @@ function search () {
     });
 
     for (let i = 0; i < styles.length; i++) {
-        fetch(`http://localhost:3030/api/rows-style?idStyle=${ styles[i].idStyle }&key=${ encodeURIComponent(key) }`, {
+        fetch(`http://localhost:3030/api/rows-style?idStyle=${ styles[i].idStyle }&key=${ encodeURIComponent(key) }&minPrice=${ minPrice }&maxPrice=${ maxPrice }`, {
             method: "GET",
             headers: {
                 "Content-Type" : "application/json"
@@ -328,7 +354,7 @@ function search () {
         })
         .then(result => {
             var data = result.data;
-            var quantityPage = result.quantityPage
+            var quantityPage = result.quantityPage;
             showData(data, styles[i], quantityPage);
         })
         .catch(error => {
@@ -342,21 +368,28 @@ function changePage (table, page) {
     var idStyle = table.attr('id').replace("table_", "");
 
     table.find("tbody").empty();
-    fetch(`http://localhost:3030/api/rows-style?idStyle=${ idStyle }&key=${ encodeURIComponent(key) }&page=${ page }`, {
+    fetch(`http://localhost:3030/api/rows-style?idStyle=${ idStyle }&key=${ encodeURIComponent(key) }&page=${ page }&minPrice=${ minPrice }&maxPrice=${ maxPrice }`, {
             method: "GET",
             headers: {
                 "Content-Type" : "application/json"
             }
         })
         .then(response => {
-            if (!response.ok) {
-                showNotification(response.statusText)
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
+            return response.json().then(data => {
+                if (!response.ok) {
+                    showNotification(data.message);
+                    throw new Error('Network response was not ok');
+                }
+                return data;
+            });
         })
         .then(result => {
             var data = result.data;
+
+            var currentWebsite = "";
+            var rowspanWebsite = 0, rowspanPosition = 0, rowspanPlatform = 0, rowspanDemo = 0;
+
+            var style = styles[idStyle - 1]
 
             for (let i = 0; i < data.length; i++) {
                 if (data[i].website != currentWebsite) {            
@@ -389,33 +422,33 @@ function changePage (table, page) {
                     setWebsiteHTML =  ``;
                 } else {
                     setWebsiteHTML = `<td class="website" rowspan="${ rowspanWebsite }" title="${ data[i].url }"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website }</a></td>`;
-                    rowspanWebsite = 0;
                 }
+                rowspanWebsite = 0;
                 
                 // merge adsPosition and dimensions
-                while(i + rowspanPosition < data.length && data[i + rowspanPosition].adsPosition == data[i].adsPosition) {
+                while(i + rowspanPosition < data.length && data[i + rowspanPosition].adsPosition == data[i].adsPosition && data[i + rowspanPosition].dimensions == data[i].dimensions && data[i + rowspanPosition].website == data[i].website) {
                     rowspanPosition ++;
                 }
                 var setPositionDimensionsHTML = ``;
-                if (data[i-1] && data[i-1].adsPosition == data[i].adsPosition) {
+                if (data[i-1] && data[i-1].adsPosition == data[i].adsPosition && data[i-1].dimensions == data[i].dimensions && data[i + rowspanPosition].website == data[i].website) {
                     setPositionDimensionsHTML =  ``;
                 } else {
                     setPositionDimensionsHTML = `<td class="adsPosition" rowspan="${ rowspanPosition }">${ data[i].adsPosition }</td>
                                                 <td class="dimensions" rowspan="${ rowspanPosition }">${ data[i].dimensions }</td>`;
-                    rowspanPosition = 0;
                 }
+                rowspanPosition = 0;
         
                 // merge platform
-                while(i + rowspanPlatform < data.length && data[i + rowspanPlatform].platform == data[i].platform) {
+                while(i + rowspanPlatform < data.length && data[i + rowspanPlatform].platform == data[i].platform && data[i + rowspanPlatform].website == data[i].website) {
                     rowspanPlatform ++;
                 }
                 var setPlatformHTML = ``;
-                if (data[i-1] && data[i-1].platform == data[i].platform) {
+                if (data[i-1] && data[i-1].platform == data[i].platform && data[i-1].website == data[i].website) {
                     setPlatformHTML =  ``;
                 } else {
                     setPlatformHTML = `<td class="platform" rowspan="${ rowspanPlatform }">${ data[i].platform }</td>`;
-                    rowspanPlatform = 0;
                 }
+                rowspanPlatform = 0;
         
                 // merge demo
                 while(i + rowspanDemo < data.length && data[i + rowspanDemo].linkDemo == data[i].linkDemo) {
@@ -426,8 +459,8 @@ function changePage (table, page) {
                     setDemoHTML =  ``;
                 } else {
                     setDemoHTML = `<td class="demo" rowspan="${ rowspanDemo }"><div>${ setDemo }</div></td>`;
-                    rowspanDemo = 0;
                 }
+                rowspanDemo = 0;
         
                 var row = `
                 <tr class="row-table">
@@ -442,7 +475,7 @@ function changePage (table, page) {
                     <td class="col5">${ data[i][style.col5] ? numterToString(data[i][style.col5]) : "" }</td>
                 </tr>
                 `;
-                $(`#table_${ idStyle } tbody`).append(row);
+                $(`#table_${ style.idStyle } tbody`).append(row);
             
             }
         })
@@ -451,3 +484,26 @@ function changePage (table, page) {
         });
 }
 
+function showNotification(message) {
+    $('#notificationText').text(message);
+    $('#notification').show();
+    setTimeout(() => {
+        setTimeout(() => {
+            $('#notification').addClass('right-slide');
+        }, 10);
+    }, 10);
+    setTimeout(() => {
+        $('#notification').removeClass('right-slide'); 
+        setTimeout(() => {
+            $('#notification').hide(); 
+        }, 500);
+    }, 3000); 
+}
+
+function formatNumber(input) {
+    var number = input.replace(/\D/g, '');
+
+    var formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+    return formattedNumber;
+}
