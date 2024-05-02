@@ -102,7 +102,7 @@ const getRowsStyle = async (req, res) => {
             SELECT COUNT(*) as cnt
             FROM sheets as s
             INNER JOIN website as w ON s.idWebsite = w.idWebsite
-            WHERE idStyle = ${ idStyle } AND (
+            WHERE s.idStyle = ${ idStyle } AND (
                 w.name LIKE '%${key || ""}%' OR 
                 s.adsPosition LIKE '%${key || ""}%' OR 
                 s.dimensions LIKE '%${key || ""}%' OR 
@@ -242,7 +242,22 @@ const getStyle = async (req, res) => {
     }
 }
 
+const getWebsites = async (req, res) => {
+    try {
+        const key = req.query.key;
+        const [rows, fields] = await pool.execute(`
+                                                    SELECT *
+                                                    FROM website
+                                                    WHERE name like '%${ key || "" }%' OR idWebsite like '%${ key || "" }%'
+                                                    `);
+        return res.status(200).json(rows)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Lỗi từ phía server' });
+    }
+}
+
 module.exports = {
     createRow, getRow, updateRow, deleteRow,
-    getStyle, getRowsStyle
+    getStyle, getRowsStyle, getWebsites
 }

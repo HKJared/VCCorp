@@ -1,0 +1,204 @@
+:root{
+    --mainColor : #296c96;
+    --borderColor: #d6d6d6;
+    --headerWeb: #ccc;
+}
+
+.add-new-table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin-left: 10px;
+    font-size: 25px;
+    color: var(--mainColor);
+    cursor: pointer;
+    user-select: none;
+    transition: font-size 0.1s ease;
+}
+  
+.add-new-table:hover {
+    font-size: 25.5px;
+}
+  
+.add-new-table:active {
+    font-size: 25x;
+}
+
+table {
+    background-color: var(--borderColor);
+}
+
+thead th {
+    height: 30px;
+    background-color: var(--mainColor);
+    color: #fff;
+}
+
+tbody {
+    background-color: #fff;
+}
+
+td {
+    height: 40px;
+}
+
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+table .id {
+    width: 50px;
+    text-align: center;
+}
+
+table .name {
+    padding-left: 10px;
+    width: 270px;
+}
+
+table .url {
+    padding-left: 10px;
+    width: 370px;
+}
+
+table .description {
+    padding-left: 10px;
+    width: 500px;
+}
+
+table .action {
+    width: 80px;
+    text-align: center;
+}
+
+.action-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 20px;
+}
+
+.action-container button {
+  margin: 3px;
+  border: 0;
+  background-color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  transition: font-size 0.4s ease;
+}
+
+.action-container button:hover {
+  font-size: 17px;
+  opacity: 0.8;
+}
+
+.action-container .update-btn {
+  color: #c7d017;
+}
+
+.action-container .delete-btn {
+  color: #eb0f0f;
+}
+
+.tooltip {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 0 5px #ccc;
+    padding: 5px;
+    width: 400px;
+    height: 240px;
+    transform: translate(-1200px, 40px);
+}
+
+.tooltip img {
+    width: 100%;
+    height: auto;
+    object-fit: cover; 
+}
+
+.update-container {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.update-body, .view-tooltip {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.update-body label {
+    margin-left: 10px;
+}
+
+.update-body input, .update-body textarea, .update-body select {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 18px;
+    border-radius: 5px;
+    resize: none;
+    border: 1px solid var(--borderColor);
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 34px;
+}
+
+.update-body textarea {
+    height: 100px;
+}
+
+.vertical-line {
+    display: flex;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-left: 2px solid var(--borderColor) ;
+    width: 2px;
+    z-index: 90;
+}
+
+.view-tooltip {
+    background-color: #fff;
+    overflow: hidden;
+    border-radius: 5px;
+    margin-top: 22px;
+}
+
+.view-tooltip .image {
+    width: 100%;
+    height: 240px;
+}
+
+.view-tooltip .image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover; 
+}
+
+.view-description {
+    width: 100%;
+    display: inline-block;
+    word-wrap: break-word;
+    box-sizing: border-box;
+    font-size: 18px;
+    padding-left: 10px;
+    padding-right: 10px;
+    color: #919191;
+}
+
+.save, .save-new-website, .save-update-row, .save-new-table {
+    width: 120px;
+    margin-top: 8px;
+    margin-left: 730px;
+    padding-top: 3px;
+    border: 0;
+    border-radius: 12px;
+    font-size: 18px;
+    background-color: #296c96;
+    color: #fff;
+    cursor: pointer;
+  }

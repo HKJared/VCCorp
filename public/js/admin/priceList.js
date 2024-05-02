@@ -663,11 +663,13 @@ $(document).ready(function() {
         }
     })
     .then(response => {
-        if (!response.ok) {
-            showNotification(response.statusText)
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
+        return response.json().then(data => {
+            if (!response.ok) {
+                showNotification(data.message);
+                throw new Error('Network response was not ok');
+            }
+            return data;
+        });
     })
     .then(result => {
         styles = result;
@@ -683,7 +685,7 @@ $(document).ready(function() {
     $(document).on('click', '.logo-web', function(event) {
         event.stopPropagation();
 
-        location.reload();
+        window.location.href = "http://localhost:3030/admin"
     });
 
     $(document).on('click', '.to-top-btn', function(event) {
@@ -828,11 +830,13 @@ $(document).ready(function() {
             }
         })
         .then(response => {
-            if (!response.ok) {
-                showNotification(response.statusText)
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
+            return response.json().then(data => {
+                if (!response.ok) {
+                    showNotification(data.message);
+                    throw new Error('Network response was not ok');
+                }
+                return data;
+            });
         })
         .then(result => {
             var data = result.data;
@@ -936,11 +940,13 @@ $(document).ready(function() {
                 body: JSON.stringify({ idRow: idRow })
             })
             .then(response => {
-                if (!response.ok) {
-                    showNotification(response.statusText)
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
+                return response.json().then(data => {
+                    if (!response.ok) {
+                        showNotification(data.message);
+                        throw new Error('Network response was not ok');
+                    }
+                    return data;
+                });
             })
             .then(result => {
                 var message = result.message;
@@ -1547,11 +1553,13 @@ function search () {
             }
         })
         .then(response => {
-            if (!response.ok) {
-                showNotification(response.statusText)
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
+            return response.json().then(data => {
+                if (!response.ok) {
+                    showNotification(data.message);
+                    throw new Error('Network response was not ok');
+                }
+                return data;
+            });
         })
         .then(result => {
             var data = result.data;
@@ -1576,11 +1584,13 @@ function changePage (table, page) {
             }
         })
         .then(response => {
-            if (!response.ok) {
-                showNotification(response.statusText)
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
+            return response.json().then(data => {
+                if (!response.ok) {
+                    showNotification(data.message);
+                    throw new Error('Network response was not ok');
+                }
+                return data;
+            });
         })
         .then(result => {
             var data = result.data;
@@ -1865,4 +1875,6 @@ function updateRowDOM (updateRow) {
         console.error('There was a problem with your fetch operation:', error);
     });
 }
-function showCon
+function showConfirm(message) {
+    
+}
