@@ -653,13 +653,17 @@ var rowStyleNewWebsiteHTML = [
         </div>
     </div>
     `
-]
+];
+
+const token = localStorage.getItem('jwtToken');
 
 $(document).ready(function() {
     fetch('http://localhost:3030/api/style', {
         method: "GET",
         headers: {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/json",
+            "Authorize" : token
+            
         }
     })
     .then(response => {
@@ -826,7 +830,8 @@ $(document).ready(function() {
         fetch(`http://localhost:3030/api/row?idRow=${ idRow }`, {
             method: 'GET',
             headers: {
-                'Content-Type' : 'application/json'
+                'Content-Type' : 'application/json',
+                "Authorize" : token
             }
         })
         .then(response => {
@@ -935,7 +940,8 @@ $(document).ready(function() {
             fetch('http://localhost:3030/api/row', {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type' : 'application/json'
+                    'Content-Type' : 'application/json',
+                    "Authorize" : token
                 },
                 body: JSON.stringify({ idRow: idRow })
             })
@@ -1549,7 +1555,8 @@ function search () {
         fetch(`http://localhost:3030/api/rows-style?idStyle=${ styles[i].idStyle }&key=${ encodeURIComponent(key) }&minPrice=${ minPrice }&maxPrice=${ maxPrice }`, {
             method: "GET",
             headers: {
-                "Content-Type" : "application/json"
+                "Content-Type" : "application/json",
+                "Authorize" : token
             }
         })
         .then(response => {
@@ -1580,7 +1587,8 @@ function changePage (table, page) {
     fetch(`http://localhost:3030/api/rows-style?idStyle=${ idStyle }&key=${ encodeURIComponent(key) }&page=${ page }&minPrice=${ minPrice }&maxPrice=${ maxPrice }`, {
             method: "GET",
             headers: {
-                "Content-Type" : "application/json"
+                "Content-Type" : "application/json",
+                "Authorize" : token
             }
         })
         .then(response => {
@@ -1683,7 +1691,8 @@ function creatNewRow (newRow) {
     fetch('http://localhost:3030/api/row', {
         method: "POST",
         headers: {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/json",
+            "Authorize" : token
         },
         body:JSON.stringify(newRow)
     })
@@ -1811,7 +1820,8 @@ function updateRowDOM (updateRow) {
     fetch('http://localhost:3030/api/row', {
         method: "PUT",
         headers: {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/json",
+            "Authorize" : token
         },
         body:JSON.stringify(updateRow)
     })

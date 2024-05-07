@@ -3,6 +3,36 @@ var key = "";
 var isSearching = false;
 var minPrice = 0, maxPrice = 10000000000;
 $(document).ready(function() {
+    var token = localStorage.getItem('jwtToken');
+    if (!token) {
+        window.location.href = 'http://localhost:3030/login-register';
+    } else {
+        fetch(`http://localhost:3030/api/authentication?token=${token}`, {
+            method: "GET",
+            headers: {
+                "Content-Type" : "application/json"
+            }
+        })
+        .then(response => {
+            return response.json().then(data => {
+                if (!response.ok) {
+                    showNotification(data.message);
+                    throw new Error('Network response was not ok');
+                }
+                return data;
+            });
+        })
+        .then(result => {
+            if (result.role <= 2) {
+                window.location.href = 'http://localhost:3030/admin';
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
+    }
+
+
     fetch('http://localhost:3030/api/style', {
         method: "GET",
         headers: {
@@ -346,11 +376,13 @@ function search () {
             }
         })
         .then(response => {
-            if (!response.ok) {
-                showNotification(response.statusText)
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
+            return response.json().then(data => {
+                if (!response.ok) {
+                    showNotification(data.message);
+                    throw new Error('Network response was not ok');
+                }
+                return data;
+            });
         })
         .then(result => {
             var data = result.data;

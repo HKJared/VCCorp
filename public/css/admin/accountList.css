@@ -1,0 +1,26 @@
+:root{
+    --mainColor : #296c96;
+    --borderColor: #d6d6d6;
+    --headerWeb: #ccc;
+}
+
+.add-new-account {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin-left: 10px;
+    font-size: 25px;
+    color: var(--mainColor);
+    cursor: pointer;
+    user-select: none;
+    transition: font-size 0.1s ease;
+}
+
+.add-new-account:hover {
+  font-size: 25.5px;
+}
+
+.add-new-account:active {
+  font-size: 25px;
+}

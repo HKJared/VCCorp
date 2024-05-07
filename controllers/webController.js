@@ -1,6 +1,15 @@
 const express = require('express');
 const pool = require('../config/connectDB');
 
+const getLoginPage = async (req, res) => {
+    try {
+        return res.status(200).render('login');
+    } catch (error) {
+        console.error(error);
+        return res.status(404).json('Server error');
+    }
+}
+
 const getHomepage = async (req, res) => {
     try {
         return res.status(200).render('index');
@@ -37,6 +46,17 @@ const getWebsiteListAdminPage = async (req, res) => {
     }
 }
 
+const getAccountListAdminPage = async (req, res) => {
+    try {
+        return res.status(200).render('admin/accountList');
+    } catch (error) {
+        console.error(error);
+        return res.status(404).json('Server error');
+    }
+}
+
 module.exports = {
-    getHomepage, getAdminPage, getPriceListAdminPage, getWebsiteListAdminPage
+    getHomepage,
+    getAdminPage, getPriceListAdminPage, getWebsiteListAdminPage, getAccountListAdminPage,
+    getLoginPage
 }

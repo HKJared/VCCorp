@@ -387,3 +387,25 @@ textarea,
   width: 300px;
 }
 
+
+
+.Xbutton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 25px;
+  width: 25px;
+  font-size: 15px;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  background-color: #296c96;
+  color: #fff;
+}
+
+.Xbutton:hover {
+  background-color: #f04d4d;
+}

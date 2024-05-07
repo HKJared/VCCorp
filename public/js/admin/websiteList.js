@@ -1,6 +1,8 @@
 var key = "";
 var img = `<img src="image/website-image/Img.png" alt="" srcset="">`;
 
+const token = localStorage.getItem('jwtToken');
+
 $(document).ready(function() {
     search();
 

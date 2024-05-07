@@ -267,3 +267,16 @@ body {
   box-shadow: 0px 0px 5px #c7c7c7;
 }
 
+.logout-container {
+  position: fixed;
+  right: 0;
+}
+
+#logout {
+  height: 50px;
+  text-align: center;
+  font-size: 25px;
+  background-color: #fff;
+  color: var(--mainColor);
+  border: 0;
+}
