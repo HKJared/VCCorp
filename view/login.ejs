@@ -5,55 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/login-register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <div class="container">
-        <div>
-            <form action="" id="loginForm">
-                <h2>Đăng nhập</h2>
-                <label for="user_name">Tên người dùng:</label>
-                <input type="text" id="user_name_login">
-                <label for="password">Mật khẩu:</label>
-                <div class="password-input-container">
-                    <input type="password" id="password_login">
-                    <button class="change-style-password" type="button"><i class="fa-regular fa-eye"></i></button>
+    <div class="container" id="container">
+        <div class="form-container sign-up">
+            <form action="" id="registerForm">
+                <h1>Đăng kí</h1>
+                <div class="social-icons">
+                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
                 </div>
-                <button class="submit-btn" type="submit">Đăng nhập</button>
-                <div class="change-form">
-                    <span>Nếu bạn chưa có tài khoản </span>
-                    <button type="button">Đăng kí</button>
-                </div>
+                <span>hoặc đăng kí bằng thông tin cá nhân</span>
+                <input type="text" id="fullname_register" placeholder="Họ và tên">
+                <input type="text" id="user_name_register" placeholder="Tên tài khoản">
+                <input type="password" id="password_register" placeholder="Mật khẩu">
+                <input type="password" id="confirm_password_register" placeholder="Xác nhận mật khẩu">
+                <button class="submit-btn" type="submit">Đăng ký</button>
             </form>
         </div>
-        <div>
-            <form action="" id="registerForm">
-                <h2>Đăng kí</h2>
-                <label for="user_name">Tên tài khoản:</label>
-                <input type="text" id="user_name_register">
-                <label for="fullname">Họ và tên:</label>
-                <input type="text" id="fullname_register">
-                <label for="password">Mật khẩu:</label>
-                <div class="password-input-container">
-                    <input type="password" id="password_register">
-                    <button class="change-style-password" type="button"><i class="fa-regular fa-eye"></i></button>
+        <div class="form-container sign-in">
+            <form action="" id="loginForm">
+                <h1>Đăng nhập</h1>
+                <div class="social-icons">
+                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
                 </div>
-                <label for="confirm_password">Xác nhận mật khẩu:</label>
-                <input type="password" id="confirm_password_register">
-                <button class="submit-btn" type="submit">Đăng ký</button>
-                <div class="change-form">
-                    <span>Nếu bạn đã có tài khoản </span>
-                    <button type="button">Đăng nhập</button>
-                </div>
+                <span>hoặc sử dụng tài khoản</span>
+                <input type="text" id="user_name_login" placeholder="Tên tài khoản">
+                <input type="password" id="password_login" placeholder="Mật khẩu">
+                <a href="#">Quên mật khẩu ?</a>
+                <button class="submit-btn" type="submit">Đăng nhập</button>
             </form>
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>Chào mừng bạn trở lại!</h1>
+                    <p>Đăng nhập để sử dụng các dịch vụ của chúng tôi</p>
+                    <button class="hidden" id="login">Đăng nhập</button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>Xin chào, bạn mới!</h1>
+                    <p>Đăng kí tài khoản với thông tin cá nhân của bạn để sử dụng các dịch vụ của chúng tôi</p>
+                    <button class="hidden" id="register">Đăng kí</button>
+                </div>
+            </div>
         </div>
     </div>
     <div id="notification" class="notification">
         <span id="notificationText"></span>
     </div>
 </body>
-
 <script src="js/login.js"></script>
 </html>

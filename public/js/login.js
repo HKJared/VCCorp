@@ -1,20 +1,14 @@
 $(document).ready(function() {
-    $(document).on('click', '#loginForm .change-form button', function(event) {
+    $('#register').on('click', function(event) {
         event.stopPropagation();
 
-        $(".container").scrollTop(400);
+        $('#container').addClass('active');
     })
 
-    $(document).on('click', '#registerForm .change-form button', function(event) {
+    $('#login').on('click', function(event) {
         event.stopPropagation();
 
-        $(".container").scrollTop(-400);
-    })
-
-    $(document).on('input', 'input', function(event) {
-        event.stopPropagation();
-
-        $(this).removeClass('warning-border')
+        $('#container').removeClass('active');
     })
 
     $('#loginForm').on('submit', function(event) {
