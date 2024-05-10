@@ -113,7 +113,8 @@ function search () {
     fetch(`http://localhost:3030/api/websites?key=${ key }`, {
         method: "GET",
         headers: {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/json",
+            "authorization" : token
         }
     })
     .then(response => {

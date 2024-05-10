@@ -1,34 +1,22 @@
-const express = require('express');
 const pool = require('../config/connectDB');
-const { generateToken, decodeToken } = require('../middleware/authentication');
-const style = [];
+const { generateToken, decodeToken } = require('../middleware/jwt');
+const { removeTokenInCache, addTokenToCache } = require('../middleware/tokenCache');
+const { hashPassword } = require('../utils/passwordHashing');
 
-async function checkAccount (account) {
-    const [row, field] = await pool.execute(`SELECT id_account, role
-                                            FROM account
-                                            WHERE user_name = ? AND password = ?
-                                            `, [account.user_name, account.password]);
-
-    if (!row.length) {
-        return { ok: false }
-    }
-
-    return { ok: true, data: { id_account: row[0].id_account, role: row[0].role } }
-}
 
 const authentication = async (req, res) => {
     try {
-        const token = req.query.token;
+        const token = req.headers.authorization;
         
-        if (!token) {
+        if(!token) {
             return res.status(400).json({ message: 'Không thể xác thực danh tính' })
         }
 
         const account = decodeToken(token);
 
-        const [row, field] = await pool.execute(`SELECT *
+        const [row, field] = await pool.execute(`SELECT role
                                                 FROM account
-                                                WHERE user_name = ? AND password = ?`, [account.user_name, account.password]);
+                                                WHERE id_account = ?`, [account.id_account]);
 
         if (!row.length) {
             return res.status(404).json({ message: 'Tài khoản không tồn tại' })
@@ -49,17 +37,38 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Account không nhận được ở phía Server' })
         }
 
-        const [row, field] = await pool.execute(`SELECT *
+        //mã hóa mật khẩu
+        account.password = hashPassword(account.password);
+
+        const [row, field] = await pool.execute(`SELECT id_account
                                                 FROM account
                                                 WHERE user_name = ? AND password = ?`, [account.user_name, account.password]);
 
         if (!row.length) {
             return res.status(404).json({ message: 'Tài khoản không tồn tại' })
-        }
+        } 
+        
 
         const token = generateToken(row[0]);
+        addTokenToCache(token);
         return res.status(200).json({ message: 'Đăng nhập thành công', token: token });
 
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Lỗi từ phía server.' });
+    }
+}
+
+const logout = async (req, res) => {
+    try {
+        const token = req.headers.authorization;
+
+        if (!token) {
+            return res.status(400).json({ message: 'Không xác định được tài khoản muốn đăng xuất' })
+        }
+
+        removeTokenInCache(token);
+        return res.status(200).json({ message: 'Đăng xuất thành công' });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Lỗi từ phía server.' });
@@ -74,19 +83,6 @@ const register = async (req, res) => {
             return res.status(400).json({ message: 'Thông tin tài khoản đăng kí không được gửi đầy đủ về phía server' });
         }
 
-        // nếu muốn tạo một tài khoản admin
-        if (account.role <= 2) {
-            const token = req.header('Authorize');
-
-            if (!token) {
-                return res.status(401).json({ message: 'Không xác thực được danh tính' })
-            }
-
-            const checkAcc = await checkAccount(decodeToken(token));
-            if (!checkAcc.ok || checkAcc.data.role > 1) {
-                return res.status(401).json({ message: 'Không đủ thẩm quyền tạo tài khoản' })
-            }
-        }
 
         const [result, none1] = await pool.execute(`SELECT id_account
                                           FROM account
@@ -96,14 +92,12 @@ const register = async (req, res) => {
             return res.status(409).json({ message: 'Tài khoản đã tồn tại' });
         }
 
-        await pool.execute(`INSERT into account (user_name, fullname, password, role)
-                                                          values (?, ?, ?, ?)
-                                                         `, [account.user_name, account.fullname, account.password, account.role]);
+        // mã hóa mật khẩu
+        account.password = hashPassword(account.password);
 
-        const [row2, fields2] = await pool.execute(`SELECT *
-                                                    FROM account
-                                                    WHERE user_name = ? `, [account.user_name]);
-        const token = generateToken(row2[0]);
+        const [newAccount] = await pool.execute(`INSERT INTO account (user_name, fullname, password, role) VALUES (?, ?, ?, ?)`, [account.user_name, account.fullname, account.password, account.role]);
+
+        const token = generateToken({ id_account: newAccount.insertId, role: account.role });
         return res.status(200).json({ message: 'Đăng kí thành công', token: token });
     } catch (error) {
         console.error(error);
@@ -116,70 +110,24 @@ const register = async (req, res) => {
 const createRow = async (req, res) => {
     try {
         const newRow = req.body;
-        const token = req.header('Authorize');
+        const id_account = req.id_account
 
-        if (!token) {
-            return res.status(401).json({ message: 'Không xác thực được danh tính' })
-        }
-
-        const checkAcc = await checkAccount(decodeToken(token));
-        console.log(checkAcc)
-            if (!checkAcc.ok || checkAcc.data.role > 2) {
-                return res.status(401).json({ message: 'Không đủ thẩm quyền tạo dữ liệu mới' })
-            }
-
-        var idWebsite;
-
-        if (!newRow.website || !newRow.url || !newRow.adsPosition || !newRow.dimensions || !newRow.platform || !newRow.demo) {
+        if (!newRow.idWebsite || !newRow.adsPosition || !newRow.dimensions || !newRow.platform || !newRow.demo) {
             return res.status(400).json({ message: 'Dữ liệu được gửi về Server không đầy đủ.' })
         }
 
-        const [rows3, fields3] = await pool.execute(`
-                                                    SELECT idWebsite, url
-                                                    FROM website
-                                                    WHERE name = ?
-                                                    `, [newRow.website]);
+        const [row, field] = await pool.execute(`SELECT s.col1 AS col1, s.col2 AS col2, s.col3 AS col3, s.col4 AS col4, s.col5 AS col5
+                                                FROM style AS s
+                                                JOIN website AS w ON s.idStyle = w.idStyle
+                                                WHERE w.idWebsite = ?
+                                                `,[ newRow.idWebsite ])
 
-        if (rows3.length) {
-            if (rows3[0].url != newRow.url) {
-                return res.status(400).json({ message: `Website ${newRow.website} đã tồn tại nhưng được gắn với một đường dẫn khác.`})
-            }
-            idWebsite = rows3[0].idWebsite;
-        } else {
-            const [newWebsite, none2] = await pool.execute(`
-                                                            INSERT INTO website (name, url)
-                                                            VALUES (?, ?)
-                                                            `, [ newRow.website, newRow.url ]);
-            idWebsite = newWebsite.insertId;
-        }
-
-        const [rows, fields] = await pool.execute(`
-                                                    SELECT idWebsite
-                                                    FROM sheets
-                                                    WHERE idWebsite = ? AND idStyle = ?
-                                                    `, [idWebsite, newRow.idStyle]);
-        const [rows4, fields4] = await pool.execute(`
-                                                    SELECT idWebsite, idStyle
-                                                    FROM sheets
-                                                    WHERE idWebsite = ?
-                                                    `, [idWebsite]);
-        if (rows.length != rows4.length) {
-            return res.status(400).json({ message: `Website ${ newRow.website } đã nằm ở bảng ${ rows4[0]. idStyle }.` })
-        }
-
-        
-
-        const [rows2, fields2] = await pool.execute(`
-                                                        SELECT col1, col2, col3, col4, col5
-                                                        FROM style
-                                                        WHERE idStyle = ?
-                                                        `, [ newRow.idStyle ]);
         const [result, none] = await pool.execute(`
                                                     INSERT INTO sheets (idWebsite, adsPosition, dimensions, platform, demo, linkDemo,
-                                                        ${ rows2[0].col1 }, ${ rows2[0].col2 }, ${ rows2[0].col3 }, ${ rows2[0].col4 }, ${ rows2[0].col5 }, idStyle, created_by)
-                                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                                                    `, [ idWebsite, newRow.adsPosition, newRow.dimensions, newRow.platform, newRow.demo, newRow.linkDemo,
-                                                        newRow.col1 || null, newRow.col2 || null, newRow.col3 || null, newRow.col4 || null, newRow.col5 || null, newRow.idStyle, checkAcc.data.id_account]);
+                                                        ${ row[0].col1 }, ${ row[0].col2 }, ${ row[0].col3 }, ${ row[0].col4 }, ${ row[0].col5 }, created_by)
+                                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                                    `, [ newRow.idWebsite, newRow.adsPosition, newRow.dimensions, newRow.platform, newRow.demo, newRow.linkDemo,
+                                                        newRow.col1 || null, newRow.col2 || null, newRow.col3 || null, newRow.col4 || null, newRow.col5 || null, id_account]);
         const idNewRow = result.insertId;
         return res.status(200).json({ message: "Đã thêm dữ liệu mới.", idNewRow: result.insertId })
     } catch (error) {
@@ -193,7 +141,7 @@ const getRow = async (req, res) => {
         const idRow = req.query.idRow;
 
         if (!idRow) {
-            return res.status(400).json({ message: 'ID của dữ liệu không được gửi từ phía bạn'});
+            return res.status(400).json({ message: 'ID của dữ liệu không được gửi từ phía client'});
         }
 
         const [row, field] = await pool.execute(`
@@ -381,7 +329,7 @@ const getWebsites = async (req, res) => {
 }
 
 module.exports = {
-    login, register, authentication,
+    login, logout, register, authentication,
     createRow, getRow, updateRow, deleteRow,
     getStyle, getRowsStyle, getWebsites
 }

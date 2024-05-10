@@ -2,7 +2,16 @@ const pool = require('../config/connectDB');
 const { decodeToken } = require('./jwt');
 const { isTokenInCache } = require('./tokenCache');
 
-const authenticate = async (req, res, next) => {
+
+// Phân quyền
+const roles = {
+    super_admin: ['create_account_data_admin', 'create', 'read', 'update', 'delete'],
+    data_admin: ['create', 'read', 'update'],
+    user: ['read']
+};
+  
+// Middleware xác thực quyền
+const authorize = async (req, res, permission, next) => {
     try {
         // Lấy token từ header của request
         const token = req.headers.authorization;
@@ -17,7 +26,8 @@ const authenticate = async (req, res, next) => {
 
         const id_account = decoded.id_account;
 
-        const [row, field] = await pool.execute(`SELECT id_account
+        let userRole;
+        const [row, field] = await pool.execute(`SELECT role
                                                 FROM account
                                                 WHERE id_account = ?
                                                 `, [id_account]);
@@ -25,17 +35,22 @@ const authenticate = async (req, res, next) => {
         if (!row.length) {
             return res.status(401).json({ message: "Người dùng không tồn tại." });
         }
+        userRole = row[0].role
 
         if (!isTokenInCache(token)) {
             return res.status(401).json({ message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại" });
         }
 
-        req.id_account = id_account;
-        next();
+        if (roles[userRole] && roles[userRole].includes(permission)) {
+            req.id_account = id_account;
+            next(); // Người dùng có quyền
+        } else {
+            res.status(403).send('Từ chối truy cập'); // Người dùng không có quyền
+        }
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Lỗi từ phía server.' });
     }
 };
 
-module.exports = authenticate;
+module.exports = authorize;

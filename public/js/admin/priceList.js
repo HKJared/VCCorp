@@ -662,7 +662,7 @@ $(document).ready(function() {
         method: "GET",
         headers: {
             "Content-Type" : "application/json",
-            "Authorize" : token
+            "authorization" : token
             
         }
     })
@@ -831,7 +831,7 @@ $(document).ready(function() {
             method: 'GET',
             headers: {
                 'Content-Type' : 'application/json',
-                "Authorize" : token
+                "authorization" : token
             }
         })
         .then(response => {
@@ -941,7 +941,7 @@ $(document).ready(function() {
                 method: 'DELETE',
                 headers: {
                     'Content-Type' : 'application/json',
-                    "Authorize" : token
+                    "authorization" : token
                 },
                 body: JSON.stringify({ idRow: idRow })
             })
@@ -1556,7 +1556,7 @@ function search () {
             method: "GET",
             headers: {
                 "Content-Type" : "application/json",
-                "Authorize" : token
+                "authorization" : token
             }
         })
         .then(response => {
@@ -1588,7 +1588,7 @@ function changePage (table, page) {
             method: "GET",
             headers: {
                 "Content-Type" : "application/json",
-                "Authorize" : token
+                "authorization" : token
             }
         })
         .then(response => {
@@ -1692,7 +1692,7 @@ function creatNewRow (newRow) {
         method: "POST",
         headers: {
             "Content-Type" : "application/json",
-            "Authorize" : token
+            "authorization" : token
         },
         body:JSON.stringify(newRow)
     })
@@ -1821,7 +1821,7 @@ function updateRowDOM (updateRow) {
         method: "PUT",
         headers: {
             "Content-Type" : "application/json",
-            "Authorize" : token
+            "authorization" : token
         },
         body:JSON.stringify(updateRow)
     })

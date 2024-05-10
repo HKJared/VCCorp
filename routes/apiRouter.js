@@ -1,25 +1,36 @@
 const express = require('express');
 const apiController = require('../controllers/apiController');
+const authenticate = require('../middleware/authentication');
+const authorize = require('../middleware/authorization');
 const apiRouter = express.Router();
 
 //login logout
-
 apiRouter.post('/login', apiController.login);
+apiRouter.post('/logout', apiController.logout);
 
 apiRouter.post('/register', apiController.register);
 
 apiRouter.get('/authentication', apiController.authentication);
 
-// 
+// quản lí sheet
+apiRouter.post('/row', (req, res, next) => {
+    authorize(req, res, 'create', next);
+}, apiController.createRow);
+apiRouter.get('/row', authenticate, apiController.getRow);
+apiRouter.get('/rows-style', authenticate, apiController.getRowsStyle);
+apiRouter.put('/row', (req, res, next) => {
+    authorize(req, res, 'update', next);
+}, apiController.updateRow);
+apiRouter.delete('/row', (req, res, next) => {
+    authorize(req, res, 'delete', next);
+}, apiController.deleteRow);
 
-apiRouter.post('/row', apiController.createRow);
-apiRouter.get('/row', apiController.getRow);
-apiRouter.get('/rows-style', apiController.getRowsStyle);
-apiRouter.put('/row', apiController.updateRow);
-apiRouter.delete('/row', apiController.deleteRow);
 
-apiRouter.get('/style', apiController.getStyle);
+// quản lí style
+apiRouter.get('/style', authenticate, apiController.getStyle);
 
-apiRouter.get('/websites', apiController.getWebsites);
+
+//quản lí website
+apiRouter.get('/websites', authenticate, apiController.getWebsites);
 
 module.exports = apiRouter;

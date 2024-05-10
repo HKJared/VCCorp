@@ -2,15 +2,16 @@ var styles = [];
 var key = "";
 var isSearching = false;
 var minPrice = 0, maxPrice = 10000000000;
+var token = localStorage.getItem('jwtToken');
 $(document).ready(function() {
-    var token = localStorage.getItem('jwtToken');
     if (!token) {
         window.location.href = 'http://localhost:3030/login-register';
     } else {
-        fetch(`http://localhost:3030/api/authentication?token=${token}`, {
+        fetch(`http://localhost:3030/api/authentication`, {
             method: "GET",
             headers: {
-                "Content-Type" : "application/json"
+                "Content-Type" : "application/json",
+                "authorization": token
             }
         })
         .then(response => {
@@ -23,7 +24,7 @@ $(document).ready(function() {
             });
         })
         .then(result => {
-            if (result.role <= 2) {
+            if (result.role == 'super_admin' || result.role == 'data_admin') {
                 window.location.href = 'http://localhost:3030/admin';
             }
         })
@@ -36,7 +37,8 @@ $(document).ready(function() {
     fetch('http://localhost:3030/api/style', {
         method: "GET",
         headers: {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/json",
+            "authorization" : token
         }
     })
     .then(response => {
@@ -372,7 +374,8 @@ function search () {
         fetch(`http://localhost:3030/api/rows-style?idStyle=${ styles[i].idStyle }&key=${ encodeURIComponent(key) }&minPrice=${ minPrice }&maxPrice=${ maxPrice }`, {
             method: "GET",
             headers: {
-                "Content-Type" : "application/json"
+                "Content-Type" : "application/json",
+                "authorization" : token
             }
         })
         .then(response => {
@@ -403,7 +406,8 @@ function changePage (table, page) {
     fetch(`http://localhost:3030/api/rows-style?idStyle=${ idStyle }&key=${ encodeURIComponent(key) }&page=${ page }&minPrice=${ minPrice }&maxPrice=${ maxPrice }`, {
             method: "GET",
             headers: {
-                "Content-Type" : "application/json"
+                "Content-Type" : "application/json",
+                "authorization" : token
             }
         })
         .then(response => {

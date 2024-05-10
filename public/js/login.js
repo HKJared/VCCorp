@@ -39,29 +39,29 @@ $(document).ready(function() {
         }
 
         fetch('http://localhost:3030/api/login', {
-        method: "POST",
-        headers: {
-            "Content-Type" : "application/json"
-        },
-        body: JSON.stringify(account)
-    })
-    .then(response => {
-        return response.json().then(data => {
-            if (!response.ok) {
-                showNotification(data.message);
-                throw new Error('Network response was not ok');
-            }
-            return data;
-        });
-    })
-    .then(result => {
-        localStorage.setItem('jwtToken', result.token);
+            method: "POST",
+            headers: {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify(account)
+        })
+        .then(response => {
+            return response.json().then(data => {
+                if (!response.ok) {
+                    showNotification(data.message);
+                    throw new Error('Network response was not ok');
+                }
+                return data;
+            });
+        })
+        .then(result => {
+            localStorage.setItem('jwtToken', result.token);
 
-        window.location.href = 'http://localhost:3030/';
-    })
-    .catch(error => {
-        console.error('There was a problem with your fetch operation:', error);
-    });
+            window.location.href = 'http://localhost:3030/';
+        })
+        .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
     });
 
     $('#registerForm').on('submit', function(event) {
@@ -102,7 +102,7 @@ $(document).ready(function() {
             user_name: user_name,
             fullname: fullname,
             password: password,
-            role: 3
+            role: 'user'
         }
 
         fetch('http://localhost:3030/api/register', {

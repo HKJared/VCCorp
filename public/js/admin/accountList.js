@@ -7,7 +7,8 @@ $(document).ready(function() {
     fetch(`http://localhost:3030/api/authentication?token=${ token }`, {
         method: "GET",
         headers: {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/json",
+            "authorization" : token
         }
     })
     .then(response => {
@@ -76,7 +77,8 @@ function search () {
     fetch(`http://localhost:3030/api/accounts?key=${ key }`, {
         method: "GET",
         headers: {
-            "Content-Type" : "application/json"
+            "Content-Type" : "application/json",
+            "authorization" : token
         }
     })
     .then(response => {
