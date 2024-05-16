@@ -1,5 +1,7 @@
 var styles = [];
+var websites = [];
 var key = "";
+var user_role = '';
 var isSearching = false;
 var skipConfirm = false;
 var minPrice = 0, maxPrice = 10000000000;
@@ -658,6 +660,52 @@ var rowStyleNewWebsiteHTML = [
 const token = localStorage.getItem('jwtToken');
 
 $(document).ready(function() {
+    fetch(`http://localhost:3030/api/authentication?token=${ token }`, {
+        method: "GET",
+        headers: {
+            "Content-Type" : "application/json",
+            "authorization" : token
+        }
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (!response.ok) {
+                showNotification(data.message);
+                throw new Error('Network response was not ok');
+            }
+            return data;
+        });
+    })
+    .then(result => {
+        user_role = result.role;
+    })
+    .catch(error => {
+        console.error('There was a problem with your fetch operation:', error);
+    });
+    fetch('http://localhost:3030/api/websites', {
+        method: "GET",
+        headers: {
+            "Content-Type" : "application/json",
+            "authorization" : token
+            
+        }
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (!response.ok) {
+                showNotification(data.message);
+                throw new Error('Network response was not ok');
+            }
+            return data;
+        });
+    })
+    .then(result => {
+        websites = result.data;
+    })
+    .catch(error => {
+        console.error('There was a problem with your fetch operation:', error);
+    });
+
     fetch('http://localhost:3030/api/style', {
         method: "GET",
         headers: {
@@ -684,8 +732,15 @@ $(document).ready(function() {
     });
 });
 
+
 // on homepage
 $(document).ready(function() {
+    $(document).on('input', 'input', function(event) {
+        event.stopPropagation();
+
+        $(this).removeClass('warning-border')
+    });
+
     $(document).on('click', '.logo-web', function(event) {
         event.stopPropagation();
 
@@ -735,6 +790,9 @@ $(document).ready(function() {
         }
 
         changePage($(this).closest("table"), numPageClick);
+        $('html, body').animate({
+            scrollTop: $(this).closest("table").offset().top - 50
+        }, 'slow');
     });
 
     $(document).on('click', '.pre', function (event) {
@@ -988,6 +1046,7 @@ $(document).ready(function() {
         $("body").children().not(".window, .notification").addClass("blur");
 
         $('.window').empty().append(rowStyleHTML[idStyle-1]);
+        $('.save').attr('data-idwebsite', idWebsite);
         $('.window .website-name').text(website);
         $('.window').show();
     });
@@ -997,31 +1056,26 @@ $(document).ready(function() {
 
         $("body").children().not(".window, .notification").addClass("blur");
 
+        let selectWebsiteHTML = ``;
+
+        for (let i = 0; i < websites.length; i++) {
+            selectWebsiteHTML += `<option value="${ websites[i].idWebsite }" data-idstyle="${ websites[i].idStyle }" data-website="${ websites[i].name }">${ websites[i].name }</option>`
+        }
+
         var coreNewRowHTML = `
         <button class="Xbutton"><i class="fa-solid fa-xmark"></i></button>
         <div>
             <div class="select-table-to-add">
-                <span>Thêm vào </span>
-                <select id="select_table_to_add">
-                    <option value="table_1">Table 1</option>
-                    <option value="table_2">Table 2</option>
-                    <option value="table_3">Table 3</option>
-                    <option value="table_4">Table 4</option>
-                    <option value="table_5">Table 5</option>
-                    <option value="table_6">Table 6</option>
-                </select>
                 <h3>Dữ liệu mới</>
             </div>
         </div>
         <div>
             <div>
-                <div class="window-child-left">
+                <div>
                     <label for="website">Website (*)</label>
-                    <input type="text" id="website">
-                </div>
-                <div class="window-child-right">
-                    <label for="url">Đường dẫn (*)</label>
-                    <input type="text" id="url">
+                    <select id='website'>
+                        ${ selectWebsiteHTML }
+                    </select>
                 </div>
             </div>
             <div>
@@ -1096,95 +1150,6 @@ $(document).ready(function() {
         $('.window').empty().append(coreNewRowHTML);
         $('.window').show();
     });
-
-    $(document).on('click', '.add-new-table', function(event) {
-        event.stopPropagation();
-
-        $("body").children().not(".window, .notification").addClass("blur");
-
-        var coreNewTableHTML = `
-        <button class="Xbutton"><i class="fa-solid fa-xmark"></i></button>
-        <div>
-            <div>
-                <h3>Thêm bảng mới</h3>
-            </div>
-            <div>
-                <div class="content-column">Nội dung hiển thị</div>
-                <div class="data-type">Kiểu dữ liệu</div>
-            </div>
-            <div class="input-data-col-container">
-                <span>Cột 1</span>
-                <div class="input-content-column">
-                    <input type="text" id="content-col1">
-                </div>
-                <span><i class="fa-solid fa-minus"></i></span>
-                <div class="input-data-type">
-                    <select name="" id="data_type_col1">
-                        <option value="buyingMethod">Cách tính giá</option>
-                        <option value="price">Giá tiền</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-data-col-container">
-                <span>Cột 2</span>
-                <div class="input-content-column">
-                    <input type="text" id="content-col2">
-                </div>
-                <span><i class="fa-solid fa-minus"></i></span>
-                <div class="input-data-type">
-                    <select name="" id="data_type_col2">
-                        <option value="price">Giá tiền</option>
-                        <option value="performance">Hiệu suất</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-data-col-container">
-                <span>Cột 3</span>
-                <div class="input-content-column">
-                    <input type="text" id="content-col3">
-                </div>
-                <span><i class="fa-solid fa-minus"></i></span>
-                <div class="input-data-type">
-                    <select name="" id="data_type_col3">
-                        <option value="price">Giá tiền</option>
-                        <option value="performance">Hiệu suất</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-data-col-container">
-                <span>Cột 4</span>
-                <div class="input-content-column">
-                    <input type="text" id="content-col4">
-                </div>
-                <span><i class="fa-solid fa-minus"></i></span>
-                <div class="input-data-type">
-                    <select name="" id="data_type_col4">
-                        <option value="price">Giá tiền</option>
-                        <option value="performance">Hiệu suất</option>
-                    </select>
-                </div>
-            </div>
-            <div class="input-data-col-container">
-                <span>Cột 5</span>
-                <div class="input-content-column">
-                    <input type="text" id="content-col2">
-                </div>
-                <span><i class="fa-solid fa-minus"></i></span>
-                <div class="input-data-type">
-                    <select name="" id="data_type_col5">
-                        <option value="price">Giá tiền</option>
-                        <option value="performance">Hiệu suất</option>
-                        <option value="note">Ghi chú</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <button class="save-new-table">SAVE</button>
-        `;
-
-        $('.window').empty().append(coreNewTableHTML);
-        $('.window').show();
-    });
 });
 
 // on window
@@ -1253,14 +1218,24 @@ $(document).ready(function() {
         var demoContent = '';
         var linkDemo = '';
     
+        let hasError = false;
         $data.find('.demo-container > div').each(function() {
             var content = $(this).find('.content').val().trim();
             var link = $(this).find('.link-demo').val().trim();
             if (content !== '' && link !== '') {
+                if (!isValidURL(link)) {
+                    $(this).find('.link-demo').addClass('warning-border');
+                    hasError = true;
+                }
                 demoContent += content + '\n';
                 linkDemo += link + '\n';
             }
         });
+        if (hasError) {
+            showNotification('Có đường dẫn không hợp lệ.');
+
+            return;
+        }
     
         if (adsPosition == '' || dimensions == '') {
             showNotification('Hãy điền các thông tin quan trọng');
@@ -1294,6 +1269,7 @@ $(document).ready(function() {
         event.stopPropagation();
 
         var $data = $(this).siblings('div');
+        var idWebsite = $(this).data('idwebsite');
     
         var idStyle = $data.attr('id').replace('window_style_', '');
         var website = $data.find('.website-name').text().trim().toLowerCase();
@@ -1310,14 +1286,24 @@ $(document).ready(function() {
         var demoContent = '';
         var linkDemo = '';
     
+        let hasError = false;
         $data.find('.demo-container > div').each(function() {
             var content = $(this).find('.content').val().trim();
             var link = $(this).find('.link-demo').val().trim();
             if (content !== '' && link !== '') {
+                if (!isValidURL(link)) {
+                    $(this).find('.link-demo').addClass('warning-border');
+                    hasError = true;
+                }
                 demoContent += content + '\n';
                 linkDemo += link + '\n';
             }
         });
+        if (hasError) {
+            showNotification('Có đường dẫn không hợp lệ.');
+
+            return;
+        }
     
         if (adsPosition == '' || dimensions == '') {
             showNotification('Hãy điền các thông tin quan trọng');
@@ -1337,6 +1323,7 @@ $(document).ready(function() {
     
         var newRow = {
             idStyle: idStyle,
+            idWebsite: idWebsite,
             website: website,
             adsPosition: adsPosition,
             dimensions: dimensions,
@@ -1353,9 +1340,10 @@ $(document).ready(function() {
         creatNewRow(newRow);
     }); 
 
-    $(document).on('change', '#select_table_to_add', function(){
-        var selectedTable = $(this).val();
-        var index = selectedTable.split('_')[1] - 1;
+    $(document).on('change', '#website', function(){
+        var selectedOption = $(this).find('option:selected');
+        var idStyle = selectedOption.data('idstyle');
+        var index = idStyle - 1;
 
         $('.end-core').nextAll().remove();
         $(rowStyleNewWebsiteHTML[index]).insertAfter('.end-core');
@@ -1369,10 +1357,10 @@ $(document).ready(function() {
         }
         
         var $data = $(this).siblings('div');
-
-        var idStyle = $('#select_table_to_add').val().split('_')[1];
-        var website = $('#website').val();
-        var url = $('#url').val();
+        
+        var idWebsite = $('#website').val();
+        var website = $('#website option:selected').data('website');
+        var idStyle = $('#website option:selected').data('idstyle');
         var adsPosition = $('#adsPosition').val();
         var dimensions = $('#dimensions').val();
         var platform = $('#platform').val();
@@ -1385,17 +1373,27 @@ $(document).ready(function() {
         
         var demoContent = '';
         var linkDemo = '';
-    
+        
+        let hasError = false;
         $data.find('.demo-container > div').each(function() {
             var content = $(this).find('.content').val().trim();
             var link = $(this).find('.link-demo').val().trim();
             if (content !== '' && link !== '') {
+                if (!isValidURL(link)) {
+                    $(this).find('.link-demo').addClass('warning-border');
+                    hasError = true;
+                }
                 demoContent += content + '\n';
                 linkDemo += link + '\n';
             }
         });
+        if (hasError) {
+            showNotification('Có đường dẫn không hợp lệ.');
+
+            return;
+        }
     
-        if (adsPosition == '' || dimensions == '' || website == '' || url == '') {
+        if (adsPosition == '' || dimensions == '' || idWebsite == '') {
             showNotification('Hãy điền các thông tin quan trọng');
             return
         }
@@ -1408,7 +1406,7 @@ $(document).ready(function() {
         var newRow = {
             idStyle: idStyle,
             website: website,
-            url: url,
+            idWebsite: idWebsite,
             adsPosition: adsPosition,
             dimensions: dimensions,
             platform: platform,
@@ -1497,7 +1495,7 @@ function showData(data, style, quantityPage) {
             currentWebsite = data[i].website;
 
             var headerWebsiteHTML = `
-                <tr class="header-website" id="header_table_${ data[i].website.toLowerCase().replace(/\./g, '') }">
+                <tr class="header-website" id="header_website_${ data[i].idWebsite }">
                     <th colspan="10"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer" title="${ data[i].url }">${ data[i].website.toUpperCase() }</a>  <button class="add-row" data-idwebsite="${ data[i].idWebsite }" title="Thêm mới"><i class="fa-solid fa-plus"></i></button></th>
                 </tr>
             `;
@@ -1513,8 +1511,9 @@ function showData(data, style, quantityPage) {
             `;
         }
 
+        let deleteBtnHTML = (user_role == 'super_admin' ? `<button type="button" class="delete-btn" title="Xóa" data-idRow="${ data[i].idRow }"><i class="fa-solid fa-trash"></i></button>` : '')
         var row = `
-        <tr class="row-table" id="row_${ data[i].idRow }">
+        <tr class="row-table" id="row_${ data[i].idRow }" title="Tạo lúc ${ formatDatetime(data[i].created_at) } bởi ${ data[i].creator_username } ${ data[i].updated_at ? ("và cập nhật gần nhất lúc " + formatDatetime(data[i].updated_at) + " bởi " + data[i].updater_username) : "" }">
             <td class="adsPosition">${ data[i].adsPosition }</td>
             <td class="dimensions">${ data[i].dimensions }</td>
             <td class="platform">${ data[i].platform }</td>
@@ -1527,7 +1526,7 @@ function showData(data, style, quantityPage) {
             <td class="action">
                 <div class="action-container">
                     <button type="button" class="update-btn" title="Chỉnh sửa" data-idRow="${ data[i].idRow }"><i class="fa-solid fa-pen"></i></button>
-                    <button type="button" class="delete-btn" title="Xóa" data-idRow="${ data[i].idRow }"><i class="fa-solid fa-trash"></i></button>
+                    ${ deleteBtnHTML }
                 </div>
             </td>
         </tr>
@@ -1552,7 +1551,7 @@ function search () {
     });
 
     for (let i = 0; i < styles.length; i++) {
-        fetch(`http://localhost:3030/api/rows-style?idStyle=${ styles[i].idStyle }&key=${ encodeURIComponent(key) }&minPrice=${ minPrice }&maxPrice=${ maxPrice }`, {
+        fetch(`http://localhost:3030/api/rows-style?idStyle=${ styles[i].idStyle }&key=${ encodeURIComponent(key) }&minPrice=${ minPrice }&maxPrice=${ maxPrice }&page=1`, {
             method: "GET",
             headers: {
                 "Content-Type" : "application/json",
@@ -1611,7 +1610,7 @@ function changePage (table, page) {
                     currentWebsite = data[i].website;
         
                     var headerWebsiteHTML = `
-                        <tr class="header-website" id="header_table_${ data[i].website.toLowerCase().replace(/\./g, '') }">
+                        <tr class="header-website" id="header_website_${ data[i].idWebsite }">
                             <th colspan="10"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer" title="${ data[i].url }">${ data[i].website.toUpperCase() }</a>  <button class="add-row" data-idwebsite="${ data[i].idWebsite }" title="Thêm mới"><i class="fa-solid fa-plus"></i></button></th>
                         </tr>
                     `;
@@ -1627,8 +1626,10 @@ function changePage (table, page) {
                     `;
                 }
         
+                let deleteBtnHTML = (user_role == 'super_admin' ? `<button type="button" class="delete-btn" title="Xóa" data-idRow="${ data[i].idRow }"><i class="fa-solid fa-trash"></i></button>` : '')
+
                 var row = `
-                <tr class="row-table" id="row_${ data[i].idRow }">
+                <tr class="row-table" id="row_${ data[i].idRow }" title="Tạo lúc ${ formatDatetime(data[i].created_at) } bởi ${ data[i].creator_username } ${ data[i].updated_at ? ("và cập nhật gần nhất lúc " + formatDatetime(data[i].updated_at) + " bởi " + data[i].updater_username) : "" }">
                     <td class="adsPosition">${ data[i].adsPosition }</td>
                     <td class="dimensions">${ data[i].dimensions }</td>
                     <td class="platform">${ data[i].platform }</td>
@@ -1641,7 +1642,7 @@ function changePage (table, page) {
                     <td class="action">
                         <div class="action-container">
                             <button type="button" class="update-btn" title="Chỉnh sửa" data-idRow="${ data[i].idRow }"><i class="fa-solid fa-pen"></i></button>
-                            <button type="button" class="delete-btn" title="Xóa" data-idRow="${ data[i].idRow }"><i class="fa-solid fa-trash"></i></button>
+                            ${ deleteBtnHTML }
                         </div>
                     </td>
                 </tr>
@@ -1721,8 +1722,10 @@ function creatNewRow (newRow) {
             `;
         }
 
+        let deleteBtnHTML = (user_role == 'super_admin' ? `<button type="button" class="delete-btn" title="Xóa" data-idRow="${ result.idNewRow }"><i class="fa-solid fa-trash"></i></button>` : '')
+
         var newRowHTML = `
-        <tr class="row-table new-row highlight-green" id="row_${ result.idNewRow }">
+        <tr class="row-table new-row highlight-green" id="row_${ result.idNewRow }" title="Tạo lúc ${ formatDatetime(result.created_at) } bởi ${ result.creator_username }">
             <td class="adsPosition">${newRow.adsPosition}</td>
             <td class="dimensions">${newRow.dimensions}</td>
             <td class="platform">${newRow.platform}</td>
@@ -1735,13 +1738,13 @@ function creatNewRow (newRow) {
             <td class="action">
                 <div class="action-container">
                     <button type="button" class="update-btn" title="Chỉnh sửa" data-idRow="${ result.idRow }"><i class="fa-solid fa-pen"></i></button>
-                    <button type="button" class="delete-btn" title="Xóa" data-idRow="${ result.idNewRow }"><i class="fa-solid fa-trash"></i></button>
+                    ${ deleteBtnHTML }
                 </div>
             </td>
         </tr>
         `;
 
-        var style = styles[newRow.idStyle - 1]
+        var style = styles[newRow.idStyle - 1];
 
         // kiểm tra bảng đã hiển thị trước đó chưa
         var theadTableContent = $(`#table_${ newRow.idStyle } thead`).html();
@@ -1788,10 +1791,10 @@ function creatNewRow (newRow) {
 
 
         //kiểm tra có header-web chưa
-        var headerWesitebContent =  $(`#header_table_${ newRow.website.toLowerCase().replace(/\./g, '') }`);
+        var headerWesitebContent =  $(`#header_web_${ newRow.idWebsite }`);
         if (!headerWesitebContent.length) {
             var headerWebsiteHTML = `
-                <tr class="header-website" id="header_table_${ newRow.website.toLowerCase().replace(/\./g, '') }">
+                <tr class="header-website" id="header_website_${ newRow.idWebsite }">
                     <th colspan="10"><a href="${ newRow.url }" target="_blank" rel="noopener noreferrer" title="${ newRow.url }">${ newRow.website.toUpperCase() }</a>  <button class="add-row" data-idwebsite="${ newRow.idWebsite }" title="Thêm mới"><i class="fa-solid fa-plus"></i></button></th>
                 </tr>
             `;
@@ -1799,7 +1802,7 @@ function creatNewRow (newRow) {
         }
 
         // validate
-        $(newRowHTML).insertAfter(`#header_table_${ newRow.website.toLowerCase().replace(/\./g, '') }`); 
+        $(newRowHTML).insertAfter(`#header_website_${ newRow.idWebsite }`); 
 
         var newPosition = $('.new-row').offset().top - 100;
 
@@ -1850,6 +1853,8 @@ function updateRowDOM (updateRow) {
             `;
         }
 
+        let deleteBtnHTML = (user_role == 'super_admin' ? `<button type="button" class="delete-btn" title="Xóa" data-idRow="${ updateRow.idNewRow }"><i class="fa-solid fa-trash"></i></button>` : '')
+
         var bodyUpdateRowHTML = `
         <td class="adsPosition">${updateRow.adsPosition}</td>
         <td class="dimensions">${updateRow.dimensions}</td>
@@ -1863,14 +1868,16 @@ function updateRowDOM (updateRow) {
         <td class="action">
             <div class="action-container">
                 <button type="button" class="update-btn" title="Chỉnh sửa" data-idRow="${ updateRow.idRow }"><i class="fa-solid fa-pen"></i></button>
-                <button type="button" class="delete-btn" title="Xóa" data-idRow="${ updateRow.idNewRow }"><i class="fa-solid fa-trash"></i></button>
+                ${ deleteBtnHTML }
             </div>
         </td>
         `;
 
         // validate
         $(`#row_${ updateRow.idRow }`).empty().append(bodyUpdateRowHTML);
-        $(`#row_${ updateRow.idRow }`).addClass('highlight-yellow')
+        var newTitle = `Tạo lúc ${ formatDatetime(result.created_at) } bởi ${ result.creator_username } ${ result.updated_at ? ("và cập nhật gần nhất lúc " + formatDatetime(result.updated_at) + " bởi " + result.updater_username) : "" }`;
+        $(`#row_${updateRow.idRow}`).attr('title', newTitle);
+        $(`#row_${ updateRow.idRow }`).addClass('highlight-yellow');
 
         var newPosition = $(`#row_${ updateRow.idRow }`).offset().top - 100;
 
@@ -1885,6 +1892,20 @@ function updateRowDOM (updateRow) {
         console.error('There was a problem with your fetch operation:', error);
     });
 }
-function showConfirm(message) {
-    
+
+function isValidURL(url) {
+    try {
+        new URL(url);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function formatDatetime (datetime) {
+    const dateTime = new Date(datetime);
+    const date = dateTime.toLocaleDateString();
+    const time = dateTime.toLocaleTimeString();
+
+    return time + " " + date;
 }

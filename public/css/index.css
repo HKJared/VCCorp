@@ -7,7 +7,7 @@
 .sheets-container {
   display: flex;
   flex-direction: column;
-  margin-top: 75px;
+  margin-top: 50px;
   margin-bottom: 15px;
   scrollbar-width: none;
 }

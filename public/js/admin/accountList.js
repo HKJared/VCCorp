@@ -21,9 +21,8 @@ $(document).ready(function() {
         });
     })
     .then(result => {
-        console.log(result.role)
-        if (result.role == 1) {
-            $('.add-new-account').append('<i class="fa-solid fa-user-plus"></i>').css('display', 'flex');;
+        if (result.role != "super_admin") {
+            $('.delete-btn').hide();
         }
     })
     .catch(error => {
@@ -33,7 +32,7 @@ $(document).ready(function() {
 
 function showData(data) {
     if (!data.length) {
-        showNotification("Không có website")
+        showNotification("Không có tài khoản nào")
         return
     }
 
@@ -42,8 +41,7 @@ function showData(data) {
         <th>ID</th>
         <th>Họ và tên</th>
         <th>Tên tài khoản</th>
-        <th>Password</th>
-        <th></th>
+        <th>Role</th>
         <th>Action</th>
     </tr>
     `;
@@ -52,19 +50,16 @@ function showData(data) {
 
     for (let i = 0; i < data.length; i++) {
         let row_table_HTML = `
-        <tr class="tooltip-row" id="row_${ data[i].idWebsite }">
-            <td class="id">${ data[i].idWebsite }</td>
-            <td class="name">${ data[i].name }</td>
-            <td class="url">${ data[i].url }</td>
-            <td class="description">${ data[i].description || "" }</td>
+        <tr class="tooltip-row" id="row_${ data[i].id_account }">
+            <td class="id">${ data[i].id_account }</td>
+            <td class="fullname">${ data[i].fullname }</td>
+            <td class="user-name">${ data[i].user_name }</td>
+            <td class="role">${ data[i].role }</td>
             <td class="action">
                 <div class="action-container">
-                    <button type="button" class="update-btn" title="Chỉnh sửa" data-idWebsite="${ data[i].idWebsite }"><i class="fa-solid fa-pen"></i></button>
-                    <button type="button" class="delete-btn" title="Xóa" data-idWebsite="${ data[i].idWebsite }"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" class="update-btn" title="Chỉnh sửa" data-idWebsite="${ data[i].id_account }"><i class="fa-solid fa-pen"></i></button>
+                    <button type="button" class="delete-btn" title="Xóa" data-idWebsite="${ data[i].id_account }"><i class="fa-solid fa-trash"></i></button>
                 </div>
-            </td>
-            <td class="tooltip">
-                ${  data[i].image ?  `<img src="${ data[i].image }">` : img }
             </td>
         </tr>
         `;
@@ -82,16 +77,34 @@ function search () {
         }
     })
     .then(response => {
-        if (!response.ok) {
-            showNotification(response.statusText)
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
+        return response.json().then(data => {
+            if (!response.ok) {
+                showNotification(data.message);
+                throw new Error('Network response was not ok');
+            }
+            return data;
+        });
     })
     .then(result => {
-        showData(result);
+        showData(result.data);
     })
     .catch(error => {
         console.error('There was a problem with your fetch operation:', error);
     });
+}
+
+function showNotification(message) {
+    $('#notificationText').text(message);
+    $('#notification').show();
+    setTimeout(() => {
+        setTimeout(() => {
+            $('#notification').addClass('right-slide');
+        }, 10);
+    }, 10);
+    setTimeout(() => {
+        $('#notification').removeClass('right-slide'); 
+        setTimeout(() => {
+            $('#notification').hide(); 
+        }, 500);
+    }, 3000); 
 }

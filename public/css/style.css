@@ -54,7 +54,7 @@ body {
 .search form {
   overflow: hidden;
   border-radius: 10px;
-  border: 1px solid #073763;
+  border: 1px solid #81a0bd;
 }
 
 .search input {
@@ -110,7 +110,7 @@ body {
   height: 25px;
   font-size: 15px;
   border-radius: 9px;
-  border: 1px solid #073763;
+  border: 1px solid #81a0bd;
   text-align: center;
 }
 
@@ -130,9 +130,8 @@ body {
   background-color: var(--mainColor);
   color: #fff;
   padding: 10px;
-  border: 1px solid #ffffff;
   border-radius: 10px 0 0 10px;
-  box-shadow: 0px 0px 3px #000;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
   transition: right 0.5s ease; 
   z-index: 9999;
 }
@@ -279,4 +278,8 @@ body {
   background-color: #fff;
   color: var(--mainColor);
   border: 0;
+}
+
+.warning-border {
+  border: 1px solid rgb(255, 182, 182) !important;
 }

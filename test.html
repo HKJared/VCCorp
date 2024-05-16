@@ -1,64 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tooltip Example</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-    .test-css {
-        display: flex;
-        justify-items: center;
-        align-items: center;
-        width: 1080px;
-        height: 100vh;
+    .tooltip-container {
+        position: relative;
+        display: inline-block;
     }
-
-
-    .icon-list {
-        font-size: 180px;
-    }
-
-    .icon-dollar {
-        display: flex;
-        justify-content: center;
-        font-size: 100px;
-        transform: translate(-50%, 60%);
-        overflow: hidden;
-        width: 82px;
-        height: 82px;
-        border-radius: 44px;
-        z-index: 90;
+    .tooltip-container .tooltip {
+        position: absolute;
+        display: none;
         background-color: #fff;
-        border: 5px solid #fff;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 15px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
     }
-
-
+    .tooltip-container .tooltip::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 0 10px 10px 10px;
+        border-style: solid;
+        border-color: transparent transparent #ccc transparent;
+    }
+    .tooltip-container:hover .tooltip {
+        display: block;
+    }
+    .tooltip-container .tooltip p {
+        margin: 0;
+    }
 </style>
+</head>
 <body>
-    <form action="/abd" method="GET">
-<button type="submit">ABC</button>
-    </form>
+
+<div class="tooltip-container">
+    <li>Option 1: Cách tính giá, Trang chủ, Roadblock Xuyên site(Độc quyền ngày), CTR trung bình(%), Est.Traffic/Tuần/slot</li>
+    <li>Option 2: Cách tính giá, ĐƠN GIÁ (VNĐ), CTR trung bình (%), Est Impression, Note</li>
+    <li>Option 3: Cách tính giá, TRANG CHỦ(Đã bao gồm VAT), XUYÊN TRANG(Đã bao gồm VAT), CHUYÊN MỤC (*)(Đã bao gồm VAT), Est.Traffic</li>
+    <li>Option 4: Cách tính giá, Trang chủ(Đã gồm VAT), Roadblock xuyên site(Độc quyền ngày)(Chưa gồm VAT), CTR trung bình (%), Est.Traffic</li>
+    <li>Option 5: Tuần(Chia sẻ 3), Tháng(Chia sẻ 3), Quý(Chia sẻ 3), Est.CTR (%), Est. Traffic</li>
+    <li>Option 6: Cách tính giá, TRANG CHỦ, XUYÊN TRANG CHI TIẾT, XUYÊN TRANG, Est Traffic</li>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
-<script>
-function formatNumber(input) {
-    // Loại bỏ tất cả các ký tự không phải số từ chuỗi đầu vào
-    var number = input.replace(/\D/g, '');
-
-    // Chia chuỗi thành các phần có độ dài tối đa là 3 ký tự và ngăn cách bằng dấu cách
-    var formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-
-    return formattedNumber;
-}
-
-$(document).ready(function() {
-    $('#numberInput').on('input', function(event) {
-        var inputValue = $(this).val();
-        $(this).val(formatNumber(inputValue));
-    });
-});
-</script>
 </html>

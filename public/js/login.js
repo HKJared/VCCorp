@@ -1,15 +1,21 @@
 $(document).ready(function() {
+    $(document).on('input', 'input', function(event) {
+        event.stopPropagation();
+
+        $(this).removeClass('warning-border')
+    });
+
     $('#register').on('click', function(event) {
         event.stopPropagation();
 
         $('#container').addClass('active');
-    })
+    });
 
     $('#login').on('click', function(event) {
         event.stopPropagation();
 
         $('#container').removeClass('active');
-    })
+    });
 
     $('#loginForm').on('submit', function(event) {
         event.preventDefault();
@@ -143,6 +149,23 @@ $(document).ready(function() {
             passwordField.attr("type", "password");
             $(this).html('<i class="fa-regular fa-eye"></i>');
         }
+    });
+
+    $('#fullname_register').on('input', function() {
+        var inputVal = $(this).val().toLowerCase(); // Chuyển đổi tất cả các ký tự thành chữ thường
+
+        var words = inputVal.split(' '); // Tách chuỗi thành mảng các từ
+
+        // Lặp qua mỗi từ và chuyển chữ cái đầu tiên của từ thành chữ in hoa
+        for (var i = 0; i < words.length; i++) {
+            // Nếu từ không rỗng, chuyển chữ cái đầu tiên của từ thành chữ in hoa
+            if (words[i] !== '') {
+                words[i] = words[i].charAt(0).toUpperCase() + words[i].substring(1);
+            }
+        }
+
+        // Ghép lại các từ thành một chuỗi và đặt lại giá trị cho input
+        $(this).val(words.join(' '));
     });
 });
 

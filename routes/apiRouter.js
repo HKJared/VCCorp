@@ -4,6 +4,7 @@ const authenticate = require('../middleware/authentication');
 const authorize = require('../middleware/authorization');
 const apiRouter = express.Router();
 
+
 //login logout
 apiRouter.post('/login', apiController.login);
 apiRouter.post('/logout', apiController.logout);
@@ -27,10 +28,25 @@ apiRouter.delete('/row', (req, res, next) => {
 
 
 // quản lí style
-apiRouter.get('/style', authenticate, apiController.getStyle);
+apiRouter.get('/style', (req, res, next) => {
+    authorize(req, res, 'read', next);
+}, apiController.getStyle);
 
 
 //quản lí website
-apiRouter.get('/websites', authenticate, apiController.getWebsites);
+apiRouter.get('/websites', (req, res, next) => {
+    authorize(req, res, 'read', next);
+}, apiController.getWebsites);
+apiRouter.get('/website', (req, res, next) => {
+    authorize(req, res, 'read', next);
+}, apiController.getWebsite);
+apiRouter.put('/website', (req, res, next) => {
+    authorize(req, res, 'update', next);
+}, apiController.updateWebsite);
+
+// quản lí account
+apiRouter.get('/accounts', (req, res, next) => {
+    authorize(req, res, 'read', next);
+}, apiController.getAccounts);
 
 module.exports = apiRouter;

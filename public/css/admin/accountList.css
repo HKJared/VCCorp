@@ -24,3 +24,101 @@
 .add-new-account:active {
   font-size: 25px;
 }
+
+table {
+  background-color: var(--borderColor);
+}
+
+thead th {
+  height: 30px;
+  background-color: var(--mainColor);
+  color: #fff;
+}
+
+tbody {
+  background-color: #fff;
+}
+
+td {
+  height: 40px;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
+}
+
+table .id {
+  width: 50px;
+  text-align: center;
+}
+
+table .fullname {
+  padding-left: 10px;
+  width: 270px;
+}
+
+table .user-name {
+  padding-left: 10px;
+  width: 500px;
+}
+
+table .role {
+  width: 100px;
+  text-align: center;
+}
+
+table .action {
+  width: 80px;
+  text-align: center;
+}
+
+.action-container {
+display: flex;
+align-items: center;
+justify-content: center;
+width: 100%;
+height: 20px;
+}
+
+.action-container button {
+margin: 3px;
+border: 0;
+background-color: #fff;
+cursor: pointer;
+font-size: 15px;
+transition: font-size 0.4s ease;
+}
+
+.action-container button:hover {
+font-size: 17px;
+opacity: 0.8;
+}
+
+.action-container .update-btn {
+color: #c7d017;
+}
+
+.action-container .delete-btn {
+color: #eb0f0f;
+}
+
+.Xbutton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 25px;
+  width: 25px;
+  font-size: 15px;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  background-color: #296c96;
+  color: #fff;
+}
+
+.Xbutton:hover {
+  background-color: #f04d4d;
+}

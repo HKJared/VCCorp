@@ -117,7 +117,7 @@ tfoot td {
 .action-container button {
   margin: 3px;
   border: 0;
-  background-color: #fff;
+  background-color: transparent;
   cursor: pointer;
   font-size: 15px;
   transition: font-size 0.4s ease;
@@ -314,52 +314,6 @@ textarea,
   text-align: center;
   justify-content: center;
 }
-
-@keyframes outstanding_green {
-  0% {
-    background-color: rgb(193, 245, 188);
-  }
-  25% {
-    background-color: rgb(220, 243, 218);
-  }
-  50% {
-    background-color: rgb(243, 243, 243);
-  }
-  75% {
-    background-color: rgb(220, 243, 218);
-  }
-  100% {
-    background-color: rgb(193, 245, 188);
-  }
-}
-
-.highlight-green {
-  animation: outstanding_green 2s infinite;
-}
-
-@keyframes outstanding_yellow {
-  0% {
-    background-color: rgb(249, 250, 219);
-  }
-  25% {
-    background-color: rgb(254, 255, 182);
-  }
-  50% {
-    background-color: rgb(255, 255, 255);
-  }
-  75% {
-    background-color: rgb(254, 255, 182);
-  }
-  100% {
-    background-color: rgb(254, 255, 182);
-  }
-}
-
-.highlight-yellow {
-  animation: outstanding_yellow 2s infinite;
-}
-
-
 
 .input-data-col-container {
   margin-top: 35px;

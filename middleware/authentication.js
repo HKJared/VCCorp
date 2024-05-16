@@ -18,7 +18,7 @@ const authenticate = async (req, res, next) => {
         const id_account = decoded.id_account;
 
         const [row, field] = await pool.execute(`SELECT id_account
-                                                FROM account
+                                                FROM accounts
                                                 WHERE id_account = ?
                                                 `, [id_account]);
 
@@ -26,9 +26,10 @@ const authenticate = async (req, res, next) => {
             return res.status(401).json({ message: "Người dùng không tồn tại." });
         }
 
-        if (!isTokenInCache(token)) {
-            return res.status(401).json({ message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại" });
-        }
+        // kiểm tra xem tài khoản đã đăng xuất chưa
+        // if (!isTokenInCache(token)) {
+        //     return res.status(401).json({ message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại" });
+        // }
 
         req.id_account = id_account;
         next();

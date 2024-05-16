@@ -12,6 +12,7 @@
   
 .nav-container a {
     display: flex;
+    position: relative;
     justify-content: center;
     line-height: 50px;
     width: 80px;
@@ -19,15 +20,74 @@
     text-decoration: none;
     color: var(--mainColor);
 }
+
+.nav-container > a::before {
+    content: "";
+    height: 2px;
+    width: 0;
+    background: var(--mainColor);
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transition: 0.25s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
   
-.nav-container a:hover {
-    background-color: var(--mainColor);
-    color: #fcfcfc;
+.nav-container > a:hover::before {
+    width: 100%;
 }
   
 .nav-container .active {
-    background-color: var(--mainColor);
-    color: #fff;
+    font-weight: bold !important;
 }
+
+@keyframes outstanding_green {
+    0% {
+      background-color: rgb(193, 245, 188);
+    }
+    25% {
+      background-color: rgb(220, 243, 218);
+    }
+    50% {
+      background-color: rgb(243, 243, 243);
+    }
+    75% {
+      background-color: rgb(220, 243, 218);
+    }
+    100% {
+      background-color: rgb(193, 245, 188);
+    }
+  }
+  
+  .highlight-green {
+    animation: outstanding_green 2s infinite !important;
+  }
+  
+  @keyframes outstanding_yellow {
+    0% {
+      background-color: rgb(249, 250, 219);
+    }
+    25% {
+      background-color: rgb(254, 255, 182);
+    }
+    50% {
+      background-color: rgb(255, 255, 255);
+    }
+    75% {
+      background-color: rgb(254, 255, 182);
+    }
+    100% {
+      background-color: rgb(254, 255, 182);
+    }
+  }
+  
+  .highlight-yellow {
+    animation: outstanding_yellow 2s infinite !important;
+  }
+
+  .warning-border {
+    border: 1px solid rgb(255, 32, 32) !important;
+    }
+  
+  
 
   

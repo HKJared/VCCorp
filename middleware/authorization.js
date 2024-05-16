@@ -28,7 +28,7 @@ const authorize = async (req, res, permission, next) => {
 
         let userRole;
         const [row, field] = await pool.execute(`SELECT role
-                                                FROM account
+                                                FROM accounts
                                                 WHERE id_account = ?
                                                 `, [id_account]);
 
@@ -37,15 +37,17 @@ const authorize = async (req, res, permission, next) => {
         }
         userRole = row[0].role
 
-        if (!isTokenInCache(token)) {
-            return res.status(401).json({ message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại" });
-        }
+        // kiểm tra xem tài khoản đã đăng xuất chưa
+        // if (!isTokenInCache(token)) {
+        //     return res.status(401).json({ message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại" });
+        // }
 
         if (roles[userRole] && roles[userRole].includes(permission)) {
+            req.role = userRole;
             req.id_account = id_account;
             next(); // Người dùng có quyền
         } else {
-            res.status(403).send('Từ chối truy cập'); // Người dùng không có quyền
+            res.status(403).json({ message: 'Từ chối truy cập' }); // Người dùng không có quyền
         }
     } catch (error) {
         console.error(error);

@@ -1,5 +1,3 @@
-var token = localStorage.getItem('jwtToken');
-
 $(document).ready(function() {
     $(document).on('click', '#logout', function(event) {
         event.stopPropagation();
