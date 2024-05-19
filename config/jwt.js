@@ -1,5 +1,6 @@
-const jwtSecret = 'VCCorp'
+const jwtSecret = 'VCCorp';
+const refreshSecret = 'VCCorpRefresh';
 
 module.exports = {
-    jwtSecret
+    jwtSecret, refreshSecret
 };

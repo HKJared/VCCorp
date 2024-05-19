@@ -36,7 +36,7 @@ $(document).ready(function() {
 
 // hàm hoạt động khi có sự kiện ở window
 $(document).ready(function() {
-    $(document).on('input', 'input', function(event) {
+    $(document).on('input', 'input, textarea', function(event) {
         event.stopPropagation();
 
         $(this).removeClass('warning-border')
@@ -199,6 +199,16 @@ $(document).ready(function() {
 
         $('.window').show();
     });
+
+    $(document).on('click', '.delete-btn', function(event) {
+        event.stopPropagation();
+
+        if (confirm('Bạn có muốn xóa website này không?')) {
+            const idWebsite = $(this).data('idwebsite');
+
+            deleteWebsite(idWebsite);
+        }
+    });
 });
 
 // hàm hoạt động khi có sự kiện ở mini window
@@ -250,7 +260,7 @@ $(document).ready(function() {
             description: description
         }
 
-        if (checkWebsiteProperties(dataUpdate)) {
+        if (isWebsiteInfoIncomplete(dataUpdate)) {
             showNotification('Hãy điền đầy đủ thông tin');
 
             return
@@ -392,22 +402,6 @@ function search () {
     });
 }
 
-function showNotification(message) {
-    $('#notificationText').text(message);
-    $('#notification').show();
-    setTimeout(() => {
-        setTimeout(() => {
-            $('#notification').addClass('right-slide');
-        }, 10);
-    }, 10);
-    setTimeout(() => {
-        $('#notification').removeClass('right-slide'); 
-        setTimeout(() => {
-            $('#notification').hide(); 
-        }, 500);
-    }, 3000); 
-}
-
 function creatNewWebsite (newWebsite, formData) {
     fetch(`http://localhost:3030/api/website`, {
         method: "POST",
@@ -431,6 +425,40 @@ function creatNewWebsite (newWebsite, formData) {
         skipConfirm = true;
         $('.Xbutton').click();
         skipConfirm = false;
+
+        const newRowHTML = `
+        <tr class="tooltip-row" id="row_${result.idWebsite}">
+            <td class="id">${result.idWebsite}</td>
+            <td class="name">${newWebsite.name}</td>
+            <td class="url"><a href="${newWebsite.url}" target="_blank">${newWebsite.url}</a></td>
+            <td class="description">${newWebsite.description || ""}</td>
+            <td class="action">
+                <div class="action-container">
+                    <button type="button" class="update-btn" title="Chỉnh sửa" data-idWebsite="${result.idWebsite}"><i class="fa-solid fa-pen"></i></button>
+                    ${ user_role == 'super_admin' ? `<button type="button" class="delete-btn" title="Xóa" data-idWebsite="${result.idWebsite}"><i class="fa-solid fa-trash"></i></button>` : '' }
+                </div>
+            </td>
+            <td class="tooltip">
+                <div>
+                    <img src="${result.image ? result.image : img}" alt="" srcset="">
+                    <span>${newWebsite.description || ""}</span>
+                </div>
+            </td>
+        </tr>
+        `;
+
+        $('table tbody').append(newRowHTML);
+
+        const $newRow = $(`#row_${result.idWebsite}`);
+        $newRow.addClass('highlight-green');
+
+        var newPosition = $newRow.offset().top - 100;
+
+        $('html, body').animate({ scrollTop: newPosition }, 1000, function() {
+            setTimeout(function() {
+                $newRow.removeClass('highlight-green');
+            }, 2000);
+        });
     })
     .catch(error => {
         console.error('There was a problem with your fetch operation:', error);
@@ -489,6 +517,34 @@ function updateWebsite (dataUpdate, formData) {
     });
 }
 
+function deleteWebsite (idWebsite) {
+    fetch('http://localhost:3030/api/website', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type' : 'application/json',
+            "authorization" : token
+            },
+        body: JSON.stringify({ idWebsite: idWebsite })
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (!response.ok) {
+                showNotification(data.message);
+                throw new Error('Network response was not ok');
+            }
+            return data;
+        });
+    })
+    .then(result => {
+        showNotification(result.message);
+
+        $(`#row_${idWebsite}`).remove();
+    })
+    .catch(error => {
+        console.error('There was a problem with your fetch operation:', error);
+    });
+}
+
 function isWebsiteInfoIncomplete(obj) {
     let result = false;
     for (let key in obj) {
@@ -498,13 +554,4 @@ function isWebsiteInfoIncomplete(obj) {
         }
     }
     return result;
-}
-
-function isValidURL(url) {
-    try {
-        new URL(url);
-        return true;
-    } catch (e) {
-        return false;
-    }
 }

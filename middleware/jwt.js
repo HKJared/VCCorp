@@ -6,6 +6,10 @@ const generateToken = (account) => {
     return jwt.sign(account, config.jwtSecret, { expiresIn: '24h' });
 };
 
+// Hàm mã hóa: Tạo Refresh Token
+const generateRefreshToken = (account) => {
+    return jwt.sign(account, config.refreshSecret, { expiresIn: '7d' });
+};
 
 const decodeToken = (token) => {
     try {
@@ -18,4 +22,4 @@ const decodeToken = (token) => {
     }
 };
 
-module.exports = { generateToken, decodeToken };
+module.exports = { generateToken, decodeToken, generateRefreshToken };

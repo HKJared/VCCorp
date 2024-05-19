@@ -3,6 +3,7 @@ var key = "";
 var isSearching = false;
 var minPrice = 0, maxPrice = 10000000000;
 var token = localStorage.getItem('jwtToken');
+var img = `/image/website-image/Img.png`; //ảnh mặc định cho website
 $(document).ready(function() {
     if (!token) {
         window.location.href = 'http://localhost:3030/login-register';
@@ -192,6 +193,16 @@ $(document).ready(function() {
         search();
     });
 
+    var timeout;
+    $(document).on('mouseover', '.header-website', function () {
+        timeout = setTimeout(() => {
+            $(this).closest('tr').find('.tooltip').fadeIn();
+        }, 500);
+    }).on('mouseout', '.header-website', function () {
+        clearTimeout(timeout);
+        $(this).closest('tr').find('.tooltip').fadeOut();
+    });
+
     $(document).on('input', '.price', function(event) {
         var inputValue = $(this).val();
 
@@ -273,7 +284,14 @@ function showData(data, style, quantityPage) {
 
             var headerWebsiteHTML = `
                 <tr class="header-website" id="header_table_${ data[i].website }" title="${ data[i].url }">
-                    <th colspan="10"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website.toUpperCase() }</a></th>
+                    <th colspan="10">
+                        <a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website.toUpperCase() }
+                            <div class="tooltip">
+                                <img src="${  data[i].image ?  data[i].image : img }" alt="" srcset="">
+                                <span>${ data[i].description || "" }</span>
+                            </div>
+                        </a>
+                    </th>
                 </tr>
             `;
             $(`#table_${ style.idStyle } tbody`).append(headerWebsiteHTML);
@@ -356,13 +374,6 @@ function showData(data, style, quantityPage) {
     }
 }
 
-function numterToString (num) {
-    if (typeof(num) == 'number' || num.includes('000')) {
-        return num.toString().replace(/[,. ]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    }
-    return num
-}
-
 function search () {
     $(".table").each(function() {
         $(this).find("thead").empty();
@@ -433,7 +444,14 @@ function changePage (table, page) {
         
                     var headerWebsiteHTML = `
                         <tr class="header-website" id="header_table_${ data[i].website }" title="${ data[i].url }">
-                            <th colspan="10"><a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website.toUpperCase() }</a></th>
+                            <th colspan="10">
+                                <a href="${ data[i].url }" target="_blank" rel="noopener noreferrer">${ data[i].website.toUpperCase() }
+                                    <div class="tooltip">
+                                        <img src="${  data[i].image ?  data[i].image : img }" alt="" srcset="">
+                                        <span>${ data[i].description || "" }</span>
+                                    </div>
+                                </a>
+                            </th>
                         </tr>
                     `;
                     $(`#table_${ style.idStyle } tbody`).append(headerWebsiteHTML);
@@ -518,28 +536,4 @@ function changePage (table, page) {
         .catch(error => {
             console.error('There was a problem with your fetch operation:', error);
         });
-}
-
-function showNotification(message) {
-    $('#notificationText').text(message);
-    $('#notification').show();
-    setTimeout(() => {
-        setTimeout(() => {
-            $('#notification').addClass('right-slide');
-        }, 10);
-    }, 10);
-    setTimeout(() => {
-        $('#notification').removeClass('right-slide'); 
-        setTimeout(() => {
-            $('#notification').hide(); 
-        }, 500);
-    }, 3000); 
-}
-
-function formatNumber(input) {
-    var number = input.replace(/\D/g, '');
-
-    var formattedNumber = number.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-
-    return formattedNumber;
 }

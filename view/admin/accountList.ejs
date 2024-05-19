@@ -20,7 +20,6 @@
             <a href="/website-list">Website</a>
             <a href="/account-list" class="active">Account</a>
         </div>
-        <div class="add-new-account" title="Thêm tài khoản mới"></div>
         <div class="search">
             <form action="" id="search_form">
                 <input type="text">
@@ -33,14 +32,25 @@
     </div>
     <div class="sheets-container">
         <table>
-            <thead></thead>
+            <thead>
+                <tr>
+                    <th class="id">ID</th>
+                    <th class="fullname">Họ và tên</th>
+                    <th class="user-name">Tên tài khoản</th>
+                    <th class="role">Role</th>
+                    <th class="action">Action</th>
+                </tr>
+            </thead>
             <tbody></tbody>
             <tfoot></tfoot>
         </table>
     </div>
-    
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
     <button class="to-top-btn"><i class="fa-solid fa-chevron-up"></i></button>
 </body>
+<script src="/js/utilities.js"></script>
 <script src="js/admin/accountList.js"></script>
 <script src="js/logout.js"></script>
 </html>

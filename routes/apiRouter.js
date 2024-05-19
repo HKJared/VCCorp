@@ -34,6 +34,9 @@ apiRouter.get('/style', (req, res, next) => {
 
 
 //quản lí website
+apiRouter.post('/website', (req, res, next) => {
+    authorize(req, res, 'create', next);
+}, apiController.createWebsite);
 apiRouter.get('/websites', (req, res, next) => {
     authorize(req, res, 'read', next);
 }, apiController.getWebsites);
@@ -43,10 +46,16 @@ apiRouter.get('/website', (req, res, next) => {
 apiRouter.put('/website', (req, res, next) => {
     authorize(req, res, 'update', next);
 }, apiController.updateWebsite);
+apiRouter.delete('/website', (req, res, next) => {
+    authorize(req, res, 'delete', next);
+}, apiController.deleteWebsite);
 
 // quản lí account
 apiRouter.get('/accounts', (req, res, next) => {
     authorize(req, res, 'read', next);
 }, apiController.getAccounts);
+
+// refresh token
+apiRouter.post('/token', apiController.refreshToken);
 
 module.exports = apiRouter;

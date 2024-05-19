@@ -3,6 +3,8 @@ const { generateToken, decodeToken } = require('../middleware/jwt');
 const { removeTokenInCache, addTokenToCache } = require('../middleware/tokenCache');
 const { hashPassword } = require('../utils/passwordHashing');
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -10,7 +12,7 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const idWebsite = req.query.idWebsite;
-        const fileName = `${idWebsite}.png`; // Đổi tên tệp và phần mở rộng
+        const fileName = idWebsite ? `${idWebsite}.png` : 'tmp.png'; // Đổi tên tệp
         cb(null, fileName);
     }
 });
@@ -52,7 +54,7 @@ const login = async (req, res) => {
 
         //mã hóa mật khẩu
         account.password = hashPassword(account.password);
-        const [row, field] = await pool.execute(`SELECT id_account, password
+        const [row, field] = await pool.execute(`SELECT id_account, role
                                                 FROM accounts
                                                 WHERE user_name = ?`, [account.user_name]);
 
@@ -65,8 +67,9 @@ const login = async (req, res) => {
         }        
 
         const token = generateToken(row[0]);
+        const refreshToken = generateRefreshToken(row[0]);
         addTokenToCache(token);
-        return res.status(200).json({ message: 'Đăng nhập thành công', token: token });
+        return res.status(200).json({ message: 'Đăng nhập thành công', token: token, refreshToken: refreshToken });
 
     } catch (error) {
         console.error(error);
@@ -221,9 +224,9 @@ const getRowsStyle = async (req, res) => {
         const rowsPerPage = 10;
         const quantityPage = Math.ceil(count[0].cnt / rowsPerPage);
 
-        // Lấy dữ liệu(max 20) trong page
+        // Lấy dữ liệu(max 10) trong page
         const [rows, fields] = await pool.execute(`
-            SELECT s.*, w.name as website, w.url as url, w.idStyle as idStyle, creator.fullname as creator_username, updater.fullname as updater_username
+            SELECT s.*, w.name as website, w.url as url, w.image as image, w.description as description, w.idStyle as idStyle, creator.fullname as creator_username, updater.fullname as updater_username
             FROM sheets as s
             INNER JOIN website as w ON s.idWebsite = w.idWebsite
             INNER JOIN accounts as creator ON s.created_by = creator.id_account
@@ -246,7 +249,7 @@ const getRowsStyle = async (req, res) => {
                 s.price3 BETWEEN ${minPrice} AND ${maxPrice}
             )
             ORDER BY s.idWebsite, s.platform, s.demo, s.adsPosition, s.created_at
-            LIMIT 20
+            LIMIT 10
             OFFSET ${(page - 1) * rowsPerPage || 0}
         `);
         return res.status(200).json({ data: rows, quantityPage: quantityPage });
@@ -356,6 +359,54 @@ const getStyle = async (req, res) => {
 }
 
 // quản lí websites
+const createWebsite = async (req, res) => {
+    upload.single('file_image')(req, res, async function (err) {
+        try {
+            if (err instanceof multer.MulterError) {
+                return res.status(500).json({ message: 'Lỗi khi tải lên tệp ảnh' });
+            } else if (err) {
+                return res.status(500).json({ message: 'Đã xảy ra lỗi' });
+            }
+
+            const data = req.body;
+
+            if (!data.name || !data.url || !data.description || !data.idStyle) {
+                return res.status(400).json({ message: 'Dữ liệu không đầy đủ' });
+            }
+
+            // Bước 1: Tạo website mới
+            const [result] = await pool.execute(`
+                INSERT INTO website (name, url, description, idStyle)
+                VALUES (?, ?, ?, ?)
+            `, [data.name, data.url, data.description, data.idStyle]);
+
+            const idWebsite = result.insertId;
+
+            // Bước 2: Cập nhật đường dẫn ảnh
+            const imagePath = `/image/website-image/${idWebsite}.png`;
+
+            await pool.execute(`
+                UPDATE website
+                SET image = ?
+                WHERE idWebsite = ?
+            `, [imagePath, idWebsite]);
+
+            // Bước 3: Đổi tên tệp ảnh tạm thành tệp ảnh thực
+            const tempPath = path.join(__dirname, '../public/image/website-image/tmp.png');
+            const targetPath = path.join(__dirname, `../public/image/website-image/${idWebsite}.png`);
+
+            fs.rename(tempPath, targetPath, (err) => {
+                if (err) return res.status(500).json({ message: 'Lỗi khi di chuyển tệp ảnh' });
+
+                return res.status(200).json({ message: 'Tạo website thành công', idWebsite: idWebsite, image: imagePath });
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Lỗi từ phía server' });
+        }
+    });
+}
+
 const getWebsites = async (req, res) => {
     try {
         const key = req.query.key;
@@ -414,28 +465,123 @@ const updateWebsite = async (req, res) => {
     }
 }
 
+const deleteWebsite = async (req, res) => {
+    try {
+        const idWebsite = req.body.idWebsite;
+        if (!idWebsite) {
+            return res.status(400).json({ message: 'Không xác định được bạn website muốn xóa' })
+        }
+
+        const [row, field] = await pool.execute(`
+                                                SELECT idWebsite
+                                                FROM website
+                                                WHERE idWebsite = ?
+                                                `, [ idWebsite ]);
+
+        if (!row.length) {
+            return res.status(404).json({ message: 'Website bạn muốn xóa không tồn tại trong cơ sở dữ liệu' })
+        }
+
+        await pool.execute(`
+                            DELETE
+                            FROM website
+                            WHERE idWebsite = ?
+                            `, [ idWebsite ]);
+        
+        // Đường dẫn tới file ảnh
+        const imagePath = path.join(__dirname, '../public/image/website-image', `${idWebsite}.png`);
+
+        // Xóa file ảnh
+        fs.unlink(imagePath, (err) => {
+            if (err && err.code !== 'ENOENT') { // Nếu có lỗi mà không phải lỗi file không tồn tại
+                console.error('Có lỗi xảy ra khi xóa file ảnh:', err);
+                return res.status(500).json({ message: 'Lỗi khi xóa file ảnh' });
+            }
+
+            // Trả về phản hồi thành công
+            res.status(200).json({ message: 'Xóa website thành công' });
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Lỗi từ phía server' });
+    }
+}
+
 // quản lí accounts
 const getAccounts = async (req, res) => {
     try {
         const key = req.query.key;
+        const page = req.query.page;
         const token_role = req.role;
-        var sqlQuery = `
-                        `;
+        var sqlQuery = ``;
+        var sqlCntQuery = ``;
+        const rowsPerPage = 20;
+
         if (token_role == "super_admin") {
+            sqlCntQuery = `
+                            SELECT COUNT(*) as cnt
+                            FROM (
+                                SELECT fullname, id_account, user_name, role
+                                FROM accounts
+                                WHERE fullname like '%${ key || "" }%' AND (role = "user" OR role = "data_admin")
+                            ) AS totalRows`;
+
             sqlQuery = `
                         SELECT fullname, id_account, user_name, role
                         FROM accounts
                         WHERE fullname like '%${ key || "" }%' AND (role = "user" OR role = "data_admin")
+                        LIMIT 20
+                        OFFSET ${(page - 1) * rowsPerPage }
                         `;
         } else {
+            sqlCntQuery = `
+                            SELECT COUNT(*) as cnt
+                            FROM (
+                                SELECT fullname, id_account, user_name, role
+                                FROM accounts
+                                WHERE fullname like '%${ key || "" }%' AND role = "user"
+                            ) AS totalRows`;
+
+
             sqlQuery = `
                         SELECT fullname, id_account, user_name, role
                         FROM accounts
                         WHERE fullname like '%${ key || "" }%' AND role = "user"
+                        LIMIT 20
+                        OFFSET ${(page - 1) * rowsPerPage }
                         `;
         }
+
+        const [count] = await pool.execute(sqlCntQuery);
+
+        // Tính số lượng trang
+        const quantityPage = Math.ceil(count[0].cnt / rowsPerPage);
+
         const [rows, fields] = await pool.execute(sqlQuery);
-        return res.status(200).json({ data: rows })
+        return res.status(200).json({ data: rows, quantityPage: quantityPage })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Lỗi từ phía server' });
+    }
+}
+
+// refresh token
+const refreshToken = async (req, res) => {
+    try {
+        const token = req.body.refreshToken;
+
+        if (!token) {
+            return res.status(401).json({ message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại" })
+        }
+
+        const decoded = decodeToken(token);
+        if (!decoded) {
+            return res.status(403).json({ message: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại" })
+        }
+
+        const accessToken = generateToken({ id_account: decoded.id_account, role: decoded.role });
+
+        return res.status(200).json({ message: "Làm mới token thành công", accessToken: accessToken });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Lỗi từ phía server' });
@@ -443,9 +589,10 @@ const getAccounts = async (req, res) => {
 }
 
 module.exports = {
-    login, logout, register, authentication,  // đăng nhập, đăng xuất, đăng kí, xác thực
-    createRow, getRow, updateRow, deleteRow,  // quản lí row
-    getStyle, getRowsStyle,                   // quản lí style
-    getWebsites, getWebsite, updateWebsite,   // quản lí website 
-    getAccounts                               // quản lí account
+    login, logout, register, authentication,                               // đăng nhập, đăng xuất, đăng kí, xác thực
+    createRow, getRow, updateRow, deleteRow,                               // quản lí row
+    getStyle, getRowsStyle,                                                // quản lí style
+    createWebsite, getWebsites, getWebsite, updateWebsite, deleteWebsite,  // quản lí website 
+    getAccounts,                                                           // quản lí account
+    refreshToken
 }

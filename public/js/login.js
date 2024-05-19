@@ -56,6 +56,7 @@ $(document).ready(function() {
         })
         .then(result => {
             localStorage.setItem('jwtToken', result.token);
+            localStorage.setItem('refreshToken', result.refreshToken);
 
             window.location.href = 'http://localhost:3030/';
         })
